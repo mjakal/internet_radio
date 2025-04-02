@@ -1,5 +1,6 @@
 'use client';
 
+import { Howl } from 'howler';
 import { RadioStation } from "@/app/types";
 import StationList from "@/components/stations/StationList";
 import React, { useEffect, useState, useCallback } from "react";
@@ -7,11 +8,11 @@ import React, { useEffect, useState, useCallback } from "react";
 const STATIONS_PER_PAGE = 24;
 
 export default function AllStations() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [player, setPlayer] = useState<Howl | null>(null);
   const [stations, setStations] = useState<RadioStation[]>([]);
+  const [currentStation, setCurrentStation] = useState<RadioStation | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-
-  console.log('st', stations);
 
   const fetchStations = useCallback(async (page: number) => {
     try {
@@ -56,6 +57,35 @@ export default function AllStations() {
     fetchStations(1);
   }, [fetchStations]);
 
+  const playStation = async (station: RadioStation) => {
+    if (player) player.unload();
+
+    const newPlayer = new Howl({
+      src: [station.url],
+      html5: true,
+      format: ['mp3', 'aac'],
+    });
+
+    newPlayer.play();
+    setPlayer(newPlayer);
+    setCurrentStation(station);
+  }
+
+  const stopPlaying = () => {
+    if (player) {
+      player.unload();
+      setPlayer(null);
+      setCurrentStation(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center my-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -94,7 +124,7 @@ export default function AllStations() {
       </div>
 
       <div className="col-span-12 space-y-6 xl:col-span-12">
-        <StationList stations={stations} />
+        <StationList stations={stations} playStation={playStation} />
       </div>
     </>
   );
