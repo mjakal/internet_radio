@@ -2,6 +2,7 @@
 
 import { Howl } from 'howler';
 import { RadioStation } from "@/app/types";
+import StationPlayer from "@/components/stations/StationPlayer";
 import StationList from "@/components/stations/StationList";
 import React, { useEffect, useState, useCallback } from "react";
 
@@ -121,6 +122,10 @@ export default function AllStations() {
             </button>
           </div>
         </form>
+      </div>
+
+      <div className="col-span-12 space-y-6 xl:col-span-12">
+        {currentStation && <StationPlayer station={currentStation} stopPlaying={stopPlaying} />}
       </div>
 
       <div className="col-span-12 space-y-6 xl:col-span-12">

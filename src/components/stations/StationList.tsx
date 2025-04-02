@@ -12,7 +12,7 @@ interface StationListProps {
 
 const StationList: React.FC<StationListProps> = ({ stations, playStation }) => {
   return (
-    <div className="grid grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {stations.map((station) => {
         const { id, favicon, name, tags } = station;
 
@@ -23,13 +23,13 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation }) => {
             onClick={() => playStation(station)}
           >
             <div className="grid grid-cols-12 gap-1">
-              <div className="col-span-4 flex items-center justify-center w-20 h-20 bg-gray-100 rounded-xl dark:bg-gray-800">
+              <div className="col-span-4 flex items-center justify-center w-30 h-30 bg-gray-100 rounded-xl dark:bg-gray-800">
                 {favicon ? (
                   <Image
                     src={favicon}
                     alt={name}
-                    width={48}
-                    height={48}
+                    width={60}
+                    height={60}
                     className="rounded"
                   />
                 ) : (
