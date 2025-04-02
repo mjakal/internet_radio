@@ -16,7 +16,7 @@ export interface RadioStation {
 
 const STATIONS_PER_PAGE = 24;
 
-export default function RadioPlayer() {
+export default function AllStations() {
   const [currentPage, setCurrentPage] = useState(1);
   const [stations, setStations] = useState<RadioStation[]>([]);
   const [loading, setLoading] = useState(true);
