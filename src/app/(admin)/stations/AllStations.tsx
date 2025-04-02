@@ -1,18 +1,8 @@
 'use client';
 
+import { RadioStation } from "@/app/types";
 import StationList from "@/components/stations/StationList";
 import React, { useEffect, useState, useCallback } from "react";
-
-export interface RadioStation {
-  id: string;
-  name: string;
-  url: string;
-  favicon?: string;
-  tags?: string;
-  codec?: string;
-  votes?: number;
-  clickcount?: number;
-}
 
 const STATIONS_PER_PAGE = 24;
 
@@ -104,7 +94,7 @@ export default function AllStations() {
       </div>
 
       <div className="col-span-12 space-y-6 xl:col-span-12">
-        <StationList />
+        <StationList stations={stations} />
       </div>
     </>
   );
