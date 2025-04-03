@@ -7,40 +7,39 @@ import Filter from "./Filter";
 import StationPlayer from "@/components/stations/StationPlayer";
 import StationList from "@/components/stations/StationList";
 
-const PLAYER_TYPE = process.env.NEXT_PLAYER || 'CLIENT';
+const PLAYER_TYPE = process.env.NEXT_PLAYER || 'SERVER';
 const STATIONS_PER_PAGE = 24;
 
 const clientPlayback = (playerRef: RefObject<Howl | null>, station: RadioStation) => {
-  const { current: player } = playerRef;
-    
-  if (player) player.unload();
+  try {
+    const { current: player } = playerRef;
+      
+    if (player) player.unload();
 
-  const newPlayer = new Howl({
-    src: [station.url],
-    html5: true,
-    format: ['mp3', 'aac'],
-  });
+    const newPlayer = new Howl({
+      src: [station.url],
+      html5: true,
+      format: ['mp3', 'aac'],
+    });
 
-  newPlayer.play();
-  playerRef.current = newPlayer;
+    newPlayer.play();
+    playerRef.current = newPlayer;
+
+    return 'DONE';
+  } catch(error) {
+    console.error('API request failed:', error);
+
+    return 'ERROR';
+  }
 }
 
 const serverPlayback = async (station: RadioStation) => {
   try {
-    /*
-    const { url } = station;
-    
-    await fetch(`/api/player?url=${url}`);
-
-    */
-    const response = await fetch('/api/player', {
+    await fetch('/api/player', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(station),
     });
-
-    const data = await response.json();
-    console.log(data);
 
     return 'DONE';
   } catch(error) {
@@ -108,21 +107,31 @@ export default function AllStations() {
   const playStation = async (station: RadioStation) => {
     // clientPlayback(playerRef, station);
     
-    serverPlayback(station);
+    const playbackStatus = PLAYER_TYPE === 'SERVER' ? await serverPlayback(station) : clientPlayback(playerRef, station);
+
+    if (playbackStatus === 'ERROR') return;
     
-    
-    // setCurrentStation(station);
+    setCurrentStation(station);
   }
 
   const stopPlaying = () => {
-    const { current: player } = playerRef;
-
-    if (!player) return;
+    if (PLAYER_TYPE === 'SERVER') {
+      fetch('/api/player', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
       
-    player.unload();
-    playerRef.current = null;
-    
-    setCurrentStation(null);
+      setCurrentStation(null);
+    } else {
+      const { current: player } = playerRef;
+
+      if (!player) return;
+        
+      player.unload();
+      playerRef.current = null;
+      
+      setCurrentStation(null);
+    }
   };
 
   return (
