@@ -1,17 +1,99 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { Howl } from 'howler';
 import Image from 'next/image';
 import Badge from "../ui/badge/Badge";
 import { ArrowUpIcon, GroupIcon } from "@/icons";
 import { RadioStation } from "@/app/types";
+import { objectHasData } from "@/helpers";
+
+const PLAYER_TYPE = process.env.NEXT_PLAYER || 'CLIENT';
 
 interface StationPlayerProps {
-  station: RadioStation,
-  stopPlaying: () => void
+  station: RadioStation | null,
+  onChange: () => void
 }
 
-const StationPlayer: React.FC<StationPlayerProps> = ({ station, stopPlaying }) => {
-  const { favicon, name, tags } = station;
+const clientPlayback = (playerRef: RefObject<Howl | null>, station: RadioStation) => {
+  try {
+    const { current: player } = playerRef;
+      
+    if (player) player.unload();
+
+    const newPlayer = new Howl({
+      src: [station.url],
+      html5: true,
+      format: ['mp3', 'aac'],
+    });
+
+    newPlayer.play();
+    playerRef.current = newPlayer;
+
+    return 'DONE';
+  } catch(error) {
+    console.error('API request failed:', error);
+
+    return 'ERROR';
+  }
+}
+
+const serverPlayback = async (station: RadioStation) => {
+  try {
+    await fetch('/api/player', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(station),
+    });
+
+    return 'DONE';
+  } catch(error) {
+    console.error('API request failed:', error);
+
+    return 'ERROR';
+  }
+}
+
+const StationPlayer: React.FC<StationPlayerProps> = ({ station, onChange }) => {
+  const [currentStation, setCurrentStation] = useState<RadioStation | null>(null);
+  const playerRef = useRef<Howl | null>(null);
+
+  useEffect(() => {
+    const playStation = async (station: RadioStation) => {
+      const playbackStatus = PLAYER_TYPE === 'SERVER' ? await serverPlayback(station) : clientPlayback(playerRef, station);
+  
+      if (playbackStatus === 'ERROR') return;
+      
+      setCurrentStation(station);
+    }
+
+    if (!objectHasData(station)) return;
+
+    playStation(station);
+  }, [station]);
+
+  const stopPlayback = () => {
+    if (PLAYER_TYPE === 'SERVER') {
+      fetch('/api/player', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } else {
+      const { current: player } = playerRef;
+
+      if (!player) return;
+        
+      player.unload();
+      playerRef.current = null;
+    }
+
+    setCurrentStation(null);
+    onChange();
+  };
+
+  // Early exit - stop component rendering
+  if (!currentStation) return null;
+  
+  const { favicon, name, tags } = currentStation;
   
   return (
     <div className="grid grid-cols-1 gap-6">
@@ -45,7 +127,7 @@ const StationPlayer: React.FC<StationPlayerProps> = ({ station, stopPlaying }) =
             </div>
             <button
               className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              onClick={stopPlaying}
+              onClick={stopPlayback}
             >
               Stop
             </button>

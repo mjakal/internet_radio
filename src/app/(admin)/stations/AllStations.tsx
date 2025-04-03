@@ -1,61 +1,18 @@
 'use client';
 
-import React, { useEffect, useState, useRef, useCallback, RefObject } from "react";
-import { Howl } from 'howler';
+import React, { useEffect, useState, useCallback, RefObject } from "react";
 import { RadioStation } from "@/app/types";
 import Filter from "./Filter";
 import StationPlayer from "@/components/stations/StationPlayer";
 import StationList from "@/components/stations/StationList";
 
-const PLAYER_TYPE = process.env.NEXT_PLAYER || 'SERVER';
 const STATIONS_PER_PAGE = 24;
-
-const clientPlayback = (playerRef: RefObject<Howl | null>, station: RadioStation) => {
-  try {
-    const { current: player } = playerRef;
-      
-    if (player) player.unload();
-
-    const newPlayer = new Howl({
-      src: [station.url],
-      html5: true,
-      format: ['mp3', 'aac'],
-    });
-
-    newPlayer.play();
-    playerRef.current = newPlayer;
-
-    return 'DONE';
-  } catch(error) {
-    console.error('API request failed:', error);
-
-    return 'ERROR';
-  }
-}
-
-const serverPlayback = async (station: RadioStation) => {
-  try {
-    await fetch('/api/player', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(station),
-    });
-
-    return 'DONE';
-  } catch(error) {
-    console.error('API request failed:', error);
-
-    return 'ERROR';
-  }
-}
 
 export default function AllStations() {
   const [stations, setStations] = useState<RadioStation[]>([]);
-  const [currentStation, setCurrentStation] = useState<RadioStation | null>(null);
+  const [station, setStation] = useState<RadioStation | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-
-  const playerRef = useRef<Howl | null>(null);
 
   console.log('cp', currentPage);
   console.log('stations', stations);
@@ -104,36 +61,6 @@ export default function AllStations() {
     fetchStations(1);
   }, [fetchStations]);
 
-  const playStation = async (station: RadioStation) => {
-    // clientPlayback(playerRef, station);
-    
-    const playbackStatus = PLAYER_TYPE === 'SERVER' ? await serverPlayback(station) : clientPlayback(playerRef, station);
-
-    if (playbackStatus === 'ERROR') return;
-    
-    setCurrentStation(station);
-  }
-
-  const stopPlaying = () => {
-    if (PLAYER_TYPE === 'SERVER') {
-      fetch('/api/player', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      
-      setCurrentStation(null);
-    } else {
-      const { current: player } = playerRef;
-
-      if (!player) return;
-        
-      player.unload();
-      playerRef.current = null;
-      
-      setCurrentStation(null);
-    }
-  };
-
   return (
     <>
       <Filter onChange={(filter: string) => console.log('filter', filter) } />
@@ -144,12 +71,12 @@ export default function AllStations() {
         </div>
       )}
       
-      <div className="col-span-12 space-y-6 xl:col-span-12">
-        {currentStation && <StationPlayer station={currentStation} stopPlaying={stopPlaying} />}
+      <div className="col-span-12 xl:col-span-12">
+        <StationPlayer station={station} onChange={() => setStation(null)} />}
       </div>
 
       <div className="col-span-12 space-y-6 xl:col-span-12">
-        <StationList stations={stations} playStation={playStation} />
+        <StationList stations={stations} playStation={(station) => setStation(station)} />
       </div>
     </>
   );
