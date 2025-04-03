@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { exec, type ChildProcess } from 'child_process';
+import { type ChildProcess } from 'child_process';
+import { setTimeout } from 'timers/promises';
 import { RadioStation } from "@/app/types";
 import play from 'play-sound';
 
@@ -22,11 +23,13 @@ function getProcessStatus() {
   return true;
 }
 
-function killProcess() {
+async function killProcess() {
   CACHED_STATION.process?.kill();
-  
+
   CACHED_STATION.station = null;
   CACHED_STATION.process = null;
+
+  await setTimeout(100);
 }
 
 export function GET() {
@@ -54,8 +57,8 @@ export async function POST(request: Request) {
 
     // Kill process before starting playback
     const isRunning = getProcessStatus();
-
-    if (isRunning) killProcess();
+    
+    if (isRunning) await killProcess();
     
     CACHED_STATION['station'] = { ...data };
     CACHED_STATION['process'] = player.play(stationURL, (error: undefined) => {
