@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Badge from "../ui/badge/Badge";
 import { ArrowUpIcon, GroupIcon } from "@/icons";
 import { RadioStation } from "@/app/types";
-import { objectHasData } from "@/helpers";
 
 const PLAYER_TYPE = process.env.NEXT_PLAYER || 'CLIENT';
 
@@ -57,6 +56,13 @@ const StationPlayer: React.FC<StationPlayerProps> = ({ station, onChange }) => {
   const [currentStation, setCurrentStation] = useState<RadioStation | null>(null);
   const playerRef = useRef<Howl | null>(null);
 
+  // Display component if station is playing on the server
+  useEffect(() => {
+    // Work in progress
+    if (PLAYER_TYPE !== 'SERVER') return;
+  }, []);
+  
+  
   useEffect(() => {
     const playStation = async (station: RadioStation) => {
       const playbackStatus = PLAYER_TYPE === 'SERVER' ? await serverPlayback(station) : clientPlayback(playerRef, station);
@@ -66,7 +72,7 @@ const StationPlayer: React.FC<StationPlayerProps> = ({ station, onChange }) => {
       setCurrentStation(station);
     }
 
-    if (!objectHasData(station)) return;
+    if (!station) return;
 
     playStation(station);
   }, [station]);
