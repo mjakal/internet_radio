@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { exec, type ChildProcess } from 'child_process';
 import { RadioStation } from "@/app/types";
+import play from 'play-sound';
+
+// Use VLC headless mode
+const player = play({ players: ['cvlc'] });
 
 const CACHED_STATION: {
   station: RadioStation | null;
@@ -10,21 +14,35 @@ const CACHED_STATION: {
   process: null,
 };
 
-export function GET(request: Request) {
+function getProcessStatus() {
+  const { process } = CACHED_STATION;
+
+  if (!process || !process.pid) return false;
+
+  return true;
+}
+
+function killProcess() {
+  CACHED_STATION.process?.kill();
+  
+  CACHED_STATION.station = null;
+  CACHED_STATION.process = null;
+}
+
+export function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const stationURL = searchParams.get('url') || '';
-    
-    console.log('stream url', stationURL);
+    const isRunning = getProcessStatus();
 
-    const process = exec(`cvlc ${stationURL}`);
+    if (!isRunning) return NextResponse.json({ playback: false, data: {} });
 
-    return NextResponse.json({ msg: 'good'});
+    const { station } = CACHED_STATION;
+
+    return NextResponse.json({ playback: true, data: station });
   } catch (error) {
     console.error('Error in GET handler:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch player status' },
-      { status: 500 }
+      { playback: false, data: {} },
+      { status: 500 },
     );
   }
 }
@@ -34,8 +52,15 @@ export async function POST(request: Request) {
     const data = await request.json(); // Parse JSON body
     const { url: stationURL } = data;
 
+    // Kill process before starting playback
+    const isRunning = getProcessStatus();
+
+    if (isRunning) killProcess();
+    
     CACHED_STATION['station'] = { ...data };
-    CACHED_STATION['process'] = exec(`cvlc ${stationURL}`);
+    CACHED_STATION['process'] = player.play(stationURL, (error: undefined) => {
+      if (error) console.error('Playback Error:', error);
+    });
     
     return NextResponse.json({ data });
   } catch (error) {
@@ -43,6 +68,20 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: 'API request failed.' },
       { status: 500 }
+    );
+  }
+}
+
+export function DELETE() {
+  try {
+    killProcess();
+
+    return NextResponse.json({ playback: false, data: {} });
+  } catch (error) {
+    console.error('Error in GET handler:', error);
+    return NextResponse.json(
+      { playback: false, data: {} },
+      { status: 500 },
     );
   }
 }
