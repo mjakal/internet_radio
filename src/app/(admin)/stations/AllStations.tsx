@@ -1,21 +1,62 @@
 'use client';
 
+import React, { useEffect, useState, useRef, useCallback, RefObject } from "react";
 import { Howl } from 'howler';
 import { RadioStation } from "@/app/types";
 import Filter from "./Filter";
 import StationPlayer from "@/components/stations/StationPlayer";
 import StationList from "@/components/stations/StationList";
-import React, { useEffect, useState, useCallback } from "react";
 
 const PLAYER_TYPE = process.env.NEXT_PLAYER || 'CLIENT';
 const STATIONS_PER_PAGE = 24;
 
+const clientPlayback = (playerRef: RefObject<Howl | null>, station: RadioStation) => {
+  const { current: player } = playerRef;
+    
+  if (player) player.unload();
+
+  const newPlayer = new Howl({
+    src: [station.url],
+    html5: true,
+    format: ['mp3', 'aac'],
+  });
+
+  newPlayer.play();
+  playerRef.current = newPlayer;
+}
+
+const serverPlayback = async (station: RadioStation) => {
+  try {
+    /*
+    const { url } = station;
+    
+    await fetch(`/api/player?url=${url}`);
+
+    */
+    const response = await fetch('/api/player', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(station),
+    });
+
+    const data = await response.json();
+    console.log(data);
+
+    return 'DONE';
+  } catch(error) {
+    console.error('API request failed:', error);
+
+    return 'ERROR';
+  }
+}
+
 export default function AllStations() {
-  const [player, setPlayer] = useState<Howl | null>(null);
   const [stations, setStations] = useState<RadioStation[]>([]);
   const [currentStation, setCurrentStation] = useState<RadioStation | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+
+  const playerRef = useRef<Howl | null>(null);
 
   console.log('cp', currentPage);
   console.log('stations', stations);
@@ -65,39 +106,35 @@ export default function AllStations() {
   }, [fetchStations]);
 
   const playStation = async (station: RadioStation) => {
-    if (player) player.unload();
-
-    const newPlayer = new Howl({
-      src: [station.url],
-      html5: true,
-      format: ['mp3', 'aac'],
-    });
-
-    newPlayer.play();
-    setPlayer(newPlayer);
-    setCurrentStation(station);
+    // clientPlayback(playerRef, station);
+    
+    serverPlayback(station);
+    
+    
+    // setCurrentStation(station);
   }
 
   const stopPlaying = () => {
-    if (player) {
-      player.unload();
-      setPlayer(null);
-      setCurrentStation(null);
-    }
-  };
+    const { current: player } = playerRef;
 
-  if (loading) {
-    return (
-      <div className="flex justify-center my-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
+    if (!player) return;
+      
+    player.unload();
+    playerRef.current = null;
+    
+    setCurrentStation(null);
+  };
 
   return (
     <>
       <Filter onChange={(filter: string) => console.log('filter', filter) } />
 
+      {loading && (
+        <div className="flex justify-center my-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      )}
+      
       <div className="col-span-12 space-y-6 xl:col-span-12">
         {currentStation && <StationPlayer station={currentStation} stopPlaying={stopPlaying} />}
       </div>
