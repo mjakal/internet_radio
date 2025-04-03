@@ -4,7 +4,6 @@ import React, { useEffect, useState, useCallback, RefObject } from "react";
 import { usePlayer } from "@/context/PlayerContext";
 import { RadioStation } from "@/app/types";
 import Filter from "./Filter";
-import StationPlayer from "@/components/stations/StationPlayer";
 import StationList from "@/components/stations/StationList";
 
 const STATIONS_PER_PAGE = 24;
@@ -69,10 +68,6 @@ export default function AllStations() {
         </div>
       )}
       
-      <div className="col-span-12 xl:col-span-12">
-        <StationPlayer />
-      </div>
-
       <div className="col-span-12 space-y-6 xl:col-span-12">
         <StationList stations={stations} playStation={playStation} />
       </div>
