@@ -5,12 +5,9 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
-  BoxCubeIcon,
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-  PieChartIcon,
-  PlugInIcon,
 } from "../icons/index";
 
 type NavItem = {

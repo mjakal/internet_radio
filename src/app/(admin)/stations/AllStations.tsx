@@ -15,6 +15,9 @@ export default function AllStations() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  console.log('cp', currentPage);
+  console.log('stations', stations);
+
   const fetchStations = useCallback(async (page: number) => {
     try {
       setLoading(true);
@@ -45,6 +48,7 @@ export default function AllStations() {
       // setHasMore(data.length === STATIONS_PER_PAGE);
       // setError(null);
     } catch (err) {
+      console.error(err);
       // setError(err instanceof Error ? err.message : 'Failed to fetch stations');
     } finally {
       setLoading(false);
