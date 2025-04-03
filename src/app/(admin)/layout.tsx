@@ -1,5 +1,6 @@
 "use client";
 
+import { PlayerProvider } from '@/context/PlayerContext';
 import { useSidebar } from "@/context/SidebarContext";
 import AppHeader from "@/layout/AppHeader";
 import AppSidebar from "@/layout/AppSidebar";
@@ -32,7 +33,11 @@ export default function AdminLayout({
         {/* Header */}
         <AppHeader />
         {/* Page Content */}
-        <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">{children}</div>
+        <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
+          <PlayerProvider>
+            {children}
+          </PlayerProvider>
+        </div>
       </div>
     </div>
   );

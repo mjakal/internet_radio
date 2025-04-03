@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, RefObject } from "react";
+import { usePlayer } from "@/context/PlayerContext";
 import { RadioStation } from "@/app/types";
 import Filter from "./Filter";
 import StationPlayer from "@/components/stations/StationPlayer";
@@ -9,13 +10,10 @@ import StationList from "@/components/stations/StationList";
 const STATIONS_PER_PAGE = 24;
 
 export default function AllStations() {
+  const { playStation } = usePlayer();
   const [stations, setStations] = useState<RadioStation[]>([]);
-  const [station, setStation] = useState<RadioStation | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-
-  console.log('cp', currentPage);
-  console.log('stations', stations);
 
   const fetchStations = useCallback(async (page: number) => {
     try {
@@ -72,11 +70,11 @@ export default function AllStations() {
       )}
       
       <div className="col-span-12 xl:col-span-12">
-        <StationPlayer station={station} onChange={() => setStation(null)} />}
+        <StationPlayer />
       </div>
 
       <div className="col-span-12 space-y-6 xl:col-span-12">
-        <StationList stations={stations} playStation={(station) => setStation(station)} />
+        <StationList stations={stations} playStation={playStation} />
       </div>
     </>
   );
