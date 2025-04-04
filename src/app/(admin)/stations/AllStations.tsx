@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, RefObject } from "react";
+import React, { useEffect, useState, useCallback, useRef, RefObject } from "react";
 import { usePlayer } from "@/context/PlayerContext";
 import { RadioStation } from "@/app/types";
 import Filter from "./Filter";
@@ -14,19 +14,23 @@ export default function AllStations() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  const queryRef = useRef<string>('');
+
   const fetchStations = useCallback(async (page: number) => {
+    const { current: query } = queryRef;
+
     try {
       setLoading(true);
+
       const params = new URLSearchParams({
-        limit: STATIONS_PER_PAGE.toString(),
-        offset: ((page - 1) * STATIONS_PER_PAGE).toString()
+        limit: `${STATIONS_PER_PAGE}`,
+        offset: `${(page - 1) * STATIONS_PER_PAGE}`,
       });
 
-      /*
-      if (searchQuery) params.append('query', searchQuery);
-      if (selectedTag) params.append('tag', selectedTag);
-      if (selectedCountry) params.append('country', selectedCountry);
-      */
+      
+      if (query) params.append('query', query);
+      // if (selectedTag) params.append('tag', selectedTag);
+      // if (selectedCountry) params.append('country', selectedCountry);
 
       const response = await fetch(`/api/stations?${params}`);
       const data = await response.json();
@@ -58,9 +62,15 @@ export default function AllStations() {
     fetchStations(1);
   }, [fetchStations]);
 
+  const onFilter = (filter: string) => {
+    queryRef.current = filter;
+    
+    fetchStations(1);
+  }
+
   return (
     <>
-      <Filter onChange={(filter: string) => console.log('filter', filter) } />
+      <Filter onChange={onFilter} />
 
       {loading && (
         <div className="flex justify-center my-8">
