@@ -55,6 +55,18 @@ export default function AllStations() {
     }
   }, []);
 
+  const onAddFavorite = useCallback(async (station: RadioStation) => {
+    try {
+      await fetch('/api/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(station),
+      });
+    } catch(error) {
+      console.error('API request failed:', error);
+    }
+  }, []);
+
   // Reset and fetch when applied filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -79,7 +91,7 @@ export default function AllStations() {
       )}
       
       <div className="col-span-12 space-y-6 xl:col-span-12">
-        <StationList stations={stations} playStation={playStation} />
+        <StationList stations={stations} playStation={playStation} onFavorite={onAddFavorite} />
       </div>
     </>
   );
