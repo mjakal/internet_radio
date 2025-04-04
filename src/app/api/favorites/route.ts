@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
+import fs from 'fs/promises';
 import { RadioStation } from "@/app/types";
 
 const CACHED_FAVORITES: {
@@ -18,6 +18,21 @@ const CACHED_FAVORITES: {
     }
   ],
 };
+
+/*
+const loadFavorites = async (filePath: string) => {
+  try {
+    const data = await fs.readFile(filePath, 'utf-8');
+    return JSON.parse(data);
+  } catch (err) {
+    console.error('Error reading JSON file:', err);
+    return null;
+  };
+};
+
+const jsonData = await loadFavorites('favorites.json');
+console.log(jsonData);
+*/
 
 const saveFavorites = () => {
   const { favorites } = CACHED_FAVORITES;
