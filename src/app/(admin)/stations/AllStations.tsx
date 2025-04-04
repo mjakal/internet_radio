@@ -62,6 +62,8 @@ export default function AllStations() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(station),
       });
+
+      console.log('added', station);
     } catch(error) {
       console.error('API request failed:', error);
     }

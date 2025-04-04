@@ -33,7 +33,7 @@ const saveFavorites = () => {
 }
 
 // Save favorites to json every hour
-setTimeout(saveFavorites, 3600000);
+// setTimeout(saveFavorites, 3600000);
 
 export function GET() {
   try {
@@ -52,7 +52,15 @@ export function GET() {
 export async function POST(request: Request) {
   try {
     const data: RadioStation = await request.json(); // Parse JSON body
+    const { id } = data;
     const { favorites } = CACHED_FAVORITES;
+
+    const alreadySet = favorites.findIndex((item) => item.id === id);
+
+    console.log('alreadySet', alreadySet);
+
+    // Early exit - trying to add duplicate favorites
+    if (alreadySet !== -1) return NextResponse.json({ data });
 
     favorites.push({ ...data });
 
