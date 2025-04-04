@@ -2,8 +2,9 @@
 import React from "react";
 import Image from 'next/image';
 import Badge from "../ui/badge/Badge";
-import { ArrowUpIcon, GroupIcon } from "@/icons";
+import { AudioIcon, GroupIcon } from "@/icons";
 import { RadioStation } from "@/app/types";
+import { truncateString } from '@/helpers';
 
 interface StationListProps {
   stations: RadioStation[],
@@ -14,7 +15,7 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {stations.map((station) => {
-        const { id, favicon, name, tags } = station;
+        const { id, favicon, name, tags, codec } = station;
 
         return (
           <div 
@@ -23,30 +24,32 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation }) => {
             onClick={() => playStation(station)}
           >
             <div className="grid grid-cols-12 gap-1">
-              <div className="col-span-4 flex items-center justify-center w-30 h-30 bg-gray-100 rounded-xl dark:bg-gray-800">
-                {favicon ? (
-                  <Image
-                    src={favicon}
-                    alt={name}
-                    width={60}
-                    height={60}
-                    className="rounded"
-                  />
-                ) : (
-                  <GroupIcon className="text-gray-800 size-6 dark:text-white/90" />
-                )}
+              <div className="col-span-4">
+                <div className="flex items-center justify-center w-30 h-30 bg-gray-100 rounded-xl dark:bg-gray-800">
+                  {favicon ? (
+                    <Image
+                      src={favicon}
+                      alt={name}
+                      width={60}
+                      height={60}
+                      className="rounded"
+                    />
+                  ) : (
+                    <GroupIcon className="text-gray-800 size-6 dark:text-white/90" />
+                  )}
+                </div>
               </div>
 
               <div className="col-span-8">
                 <div>
                   <h6 className="font-bold text-gray-800 text-title-sm dark:text-white/90">
-                    {name}
+                    {truncateString(name, 15)}
                   </h6>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {tags}
-                  </span>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {truncateString(tags, 100)}
+                  </p>
                   <Badge color="success">
-                  <ArrowUpIcon /> 11.01%
+                    <AudioIcon /> {codec || 'MP3'}
                   </Badge>
                 </div>
               </div>
@@ -54,9 +57,6 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation }) => {
           </div>
         );
       })}
-      {/* <!-- Metric Item Start --> */}
-      
-      {/* <!-- Metric Item End --> */}
     </div>
   );
 };

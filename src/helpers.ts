@@ -1,12 +1,4 @@
-export const objectHasData = (dataObject = {}) => {
-  if (!dataObject || !(dataObject instanceof Object)) return false;
-
-  if (!Object.keys(dataObject).length) return false;
-
-  return true;
-};
-
-export const truncateString = (str = '', maxLength = 0, defaultStr = '') => {
+export const truncateString = (str: string = '', maxLength: number = 0, defaultStr: string = '') => {
   if (!str) return defaultStr;
 
   return str.length > maxLength ? `${str.slice(0, maxLength)}...` : str;

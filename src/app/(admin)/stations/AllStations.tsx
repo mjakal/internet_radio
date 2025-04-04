@@ -14,7 +14,7 @@ export default function AllStations() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  const queryRef = useRef<string>('');
+  const queryRef = useRef<string>('alternative');
 
   const fetchStations = useCallback(async (page: number) => {
     const { current: query } = queryRef;
