@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import { RadioStation } from "@/app/types";
-import RadioSm from '@/components/form/input/RadioSm';
 
 const CACHED_FAVORITES: {
   favorites: RadioStation[];
@@ -10,6 +9,8 @@ const CACHED_FAVORITES: {
 };
 
 const loadFavorites = async (filePath: string = 'favorites.json') => {
+  console.log('loading data from file');
+  
   try {
     const data = await fs.readFile(filePath, 'utf-8');
 
@@ -24,16 +25,19 @@ const loadFavorites = async (filePath: string = 'favorites.json') => {
 // Load favorites.json before first api request
 await loadFavorites('favorites.json');
 
-const saveFavorites = () => {
+const saveFavorites = async () => {
   const { favorites } = CACHED_FAVORITES;
 
-  fs.writeFile('favorites.json', JSON.stringify(favorites, null, 2), (error) => {
+  console.log('saving data to file');
+
+  await fs.writeFile('favorites.json', JSON.stringify(favorites, null, 2), (error) => {
     if (error) console.error('Error writing file:', error);
   });
 }
 
 // Save favorites to json every hour
-// setTimeout(saveFavorites, 3600000);
+// Need to store this in sqlite3 
+setTimeout(saveFavorites, 3600000);
 
 export function GET() {
   try {

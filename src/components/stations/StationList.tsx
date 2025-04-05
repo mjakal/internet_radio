@@ -2,7 +2,7 @@
 import React from "react";
 import Image from 'next/image';
 import Badge from "../ui/badge/Badge";
-import { AudioIcon, GroupIcon, ShootingStarIcon } from "@/icons";
+import { AudioIcon, GroupIcon } from "@/icons";
 import { RadioStation } from "@/app/types";
 import { truncateString } from '@/helpers';
 

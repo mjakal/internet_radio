@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef, RefObject } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { usePlayer } from "@/context/PlayerContext";
 import { RadioStation } from "@/app/types";
+import { Loading, NoData } from "@/components/common/ApiComponents";
 import Filter from "./Filter";
 import StationList from "@/components/stations/StationList";
 
@@ -12,7 +13,8 @@ export default function AllStations() {
   const { playStation } = usePlayer();
   const [stations, setStations] = useState<RadioStation[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [apiState, setApiState] = useState('LOADING');
 
   const queryRef = useRef<string>('alternative');
 
@@ -20,7 +22,7 @@ export default function AllStations() {
     const { current: query } = queryRef;
 
     try {
-      setLoading(true);
+      setApiState('LOADING');
 
       const params = new URLSearchParams({
         limit: `${STATIONS_PER_PAGE}`,
@@ -45,15 +47,23 @@ export default function AllStations() {
         setStations(prev => [...prev, ...data]);
       }
 
-      // setHasMore(data.length === STATIONS_PER_PAGE);
+      setHasMore(data.length === STATIONS_PER_PAGE);
       // setError(null);
     } catch (err) {
       console.error(err);
       // setError(err instanceof Error ? err.message : 'Failed to fetch stations');
     } finally {
-      setLoading(false);
+      setApiState('DONE');
     }
   }, []);
+
+  const loadMore = useCallback((prevPage) => {
+    const nextPage = prevPage + 1;
+    
+    setCurrentPage(nextPage);
+
+    fetchStations(nextPage);
+  }, [fetchStations]);
 
   const onAddFavorite = useCallback(async (station: RadioStation) => {
     try {
@@ -62,8 +72,6 @@ export default function AllStations() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(station),
       });
-
-      console.log('added', station);
     } catch(error) {
       console.error('API request failed:', error);
     }
@@ -86,15 +94,32 @@ export default function AllStations() {
     <>
       <Filter onChange={onFilter} />
 
-      {loading && (
-        <div className="flex justify-center my-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        </div>
+      {apiState === 'LOADING' && <Loading />}
+
+      {apiState === 'ERROR' && <NoData />}
+
+      {apiState === 'DONE' && (
+        <>
+          {stations.length ? (
+            <div className="col-span-12 space-y-6 xl:col-span-12">
+              <StationList stations={stations} playStation={playStation} onFavorite={onAddFavorite} />
+            </div>
+          ) : (
+            <NoData />
+          )}
+
+          {hasMore && (
+            <div className="col-span-12 space-y-6 xl:col-span-12">
+              <button
+                onClick={() => loadMore(currentPage)}
+                className="w-full bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 px-4 py-2 rounded-r-md"
+              >
+                Load More
+              </button>
+            </div>
+          )}
+        </>
       )}
-      
-      <div className="col-span-12 space-y-6 xl:col-span-12">
-        <StationList stations={stations} playStation={playStation} onFavorite={onAddFavorite} />
-      </div>
     </>
   );
 }
