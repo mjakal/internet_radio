@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { type ChildProcess } from 'child_process';
 import { setTimeout } from 'timers/promises';
 import { RadioStation } from "@/app/types";
+// @ts-expect-error: play-sound has no type definitions
 import play from 'play-sound';
 
 // Use VLC headless mode

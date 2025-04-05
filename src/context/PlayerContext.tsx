@@ -7,7 +7,7 @@ import { RadioStation } from "@/app/types";
 
 const PLAYER_TYPE = process.env.NEXT_PLAYER || 'SERVER';
 
-const clientPlayback = (playerRef: RefObject<Howl | null>, station: RadioStation | null) => {
+const clientPlayback = (playerRef: RefObject<Howl | null>, station: RadioStation) => {
   try {
     const { current: player } = playerRef;
       

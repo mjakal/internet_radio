@@ -12,9 +12,9 @@ const STATIONS_PER_PAGE = 24;
 export default function AllStations() {
   const { playStation } = usePlayer();
   const [stations, setStations] = useState<RadioStation[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [apiState, setApiState] = useState('LOADING');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [apiState, setApiState] = useState<string>('LOADING');
 
   const queryRef = useRef<string>('alternative');
 
@@ -47,17 +47,15 @@ export default function AllStations() {
         setStations(prev => [...prev, ...data]);
       }
 
+      setApiState('DONE');
       setHasMore(data.length === STATIONS_PER_PAGE);
-      // setError(null);
     } catch (err) {
       console.error(err);
-      // setError(err instanceof Error ? err.message : 'Failed to fetch stations');
-    } finally {
-      setApiState('DONE');
+      setApiState('ERROR');
     }
   }, []);
 
-  const loadMore = useCallback((prevPage) => {
+  const loadMore = useCallback((prevPage: number) => {
     const nextPage = prevPage + 1;
     
     setCurrentPage(nextPage);

@@ -30,9 +30,7 @@ const saveFavorites = async () => {
 
   console.log('saving data to file');
 
-  await fs.writeFile('favorites.json', JSON.stringify(favorites, null, 2), (error) => {
-    if (error) console.error('Error writing file:', error);
-  });
+  await fs.writeFile('favorites.json', JSON.stringify(favorites, null, 2));
 }
 
 // Save favorites to json every hour
