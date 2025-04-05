@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 interface FilterProps {
-  onChange: (filter: string) => void
+  onChange: (filter: string) => void;
 }
 
 const FilterIcon = () => (
-  <span className="absolute -translate-y-1/2 left-4 top-1/2 pointer-events-none">
+  <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
     <svg
       className="fill-gray-500 dark:fill-gray-400"
       width="20"
@@ -41,14 +41,11 @@ const Filter: React.FC<FilterProps> = ({ onChange }) => {
     event.preventDefault();
 
     onChange(filter);
-  }
+  };
 
   return (
-    <form 
-      className="col-span-12 md:col-span-6 xl:col-span-4"
-      onSubmit={onSubmit}
-    >
-      <div className="flex items-center relative">
+    <form className="col-span-12 md:col-span-6 xl:col-span-4" onSubmit={onSubmit}>
+      <div className="relative flex items-center">
         <FilterIcon />
         <input
           type="text"
@@ -60,11 +57,11 @@ const Filter: React.FC<FilterProps> = ({ onChange }) => {
           }}
           onKeyDown={handleKeyDown}
           placeholder="Search..."
-          className="dark:bg-dark-900 h-10 w-full rounded-l-md border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[430px]"
+          className="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-10 w-full rounded-l-md border border-gray-200 bg-transparent py-2.5 pr-14 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[430px] dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30"
         />
         <button
           type="submit"
-          className="bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 px-4 py-2 rounded-r-md"
+          className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 rounded-r-md px-4 py-2 text-white"
         >
           Filter
         </button>

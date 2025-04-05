@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import { usePlayer } from "@/context/PlayerContext";
-import { RadioStation } from "@/app/types";
-import { Loading, NoData } from "@/components/common/ApiComponents";
-import Filter from "./Filter";
-import StationList from "@/components/stations/StationList";
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { usePlayer } from '@/context/PlayerContext';
+import { RadioStation } from '@/app/types';
+import { Loading, NoData } from '@/components/common/ApiComponents';
+import Filter from './Filter';
+import StationList from '@/components/stations/StationList';
 
 const STATIONS_PER_PAGE = 24;
 
@@ -29,14 +29,13 @@ export default function AllStations() {
         offset: `${(page - 1) * STATIONS_PER_PAGE}`,
       });
 
-      
       if (query) params.append('query', query);
       // if (selectedTag) params.append('tag', selectedTag);
       // if (selectedCountry) params.append('country', selectedCountry);
 
       const response = await fetch(`/api/stations?${params}`);
       const data = await response.json();
-      
+
       if (data.error) {
         throw new Error(data.error);
       }
@@ -44,7 +43,7 @@ export default function AllStations() {
       if (page === 1) {
         setStations(data);
       } else {
-        setStations(prev => [...prev, ...data]);
+        setStations((prev) => [...prev, ...data]);
       }
 
       setApiState('DONE');
@@ -55,13 +54,16 @@ export default function AllStations() {
     }
   }, []);
 
-  const loadMore = useCallback((prevPage: number) => {
-    const nextPage = prevPage + 1;
-    
-    setCurrentPage(nextPage);
+  const loadMore = useCallback(
+    (prevPage: number) => {
+      const nextPage = prevPage + 1;
 
-    fetchStations(nextPage);
-  }, [fetchStations]);
+      setCurrentPage(nextPage);
+
+      fetchStations(nextPage);
+    },
+    [fetchStations],
+  );
 
   const onAddFavorite = useCallback(async (station: RadioStation) => {
     try {
@@ -70,7 +72,7 @@ export default function AllStations() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(station),
       });
-    } catch(error) {
+    } catch (error) {
       console.error('API request failed:', error);
     }
   }, []);
@@ -84,9 +86,9 @@ export default function AllStations() {
 
   const onFilter = (filter: string) => {
     queryRef.current = filter;
-    
+
     fetchStations(1);
-  }
+  };
 
   return (
     <>
@@ -100,7 +102,11 @@ export default function AllStations() {
         <>
           {stations.length ? (
             <div className="col-span-12 space-y-6 xl:col-span-12">
-              <StationList stations={stations} playStation={playStation} onFavorite={onAddFavorite} />
+              <StationList
+                stations={stations}
+                playStation={playStation}
+                onFavorite={onAddFavorite}
+              />
             </div>
           ) : (
             <NoData />
@@ -110,7 +116,7 @@ export default function AllStations() {
             <div className="col-span-12 space-y-6 xl:col-span-12">
               <button
                 onClick={() => loadMore(currentPage)}
-                className="w-full bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 px-4 py-2 rounded-r-md"
+                className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 w-full rounded-r-md px-4 py-2 text-white"
               >
                 Load More
               </button>

@@ -1,48 +1,42 @@
-"use client";
-import React from "react";
+'use client';
+import React from 'react';
 import Image from 'next/image';
-import Badge from "../ui/badge/Badge";
-import { AudioIcon, GroupIcon } from "@/icons";
-import { RadioStation } from "@/app/types";
+import Badge from '../ui/badge/Badge';
+import { AudioIcon, GroupIcon } from '@/icons';
+import { RadioStation } from '@/app/types';
 import { truncateString } from '@/helpers';
 
 interface StationListProps {
-  stations: RadioStation[],
-  playStation: (station: RadioStation) => void,
-  onFavorite: (station: RadioStation) => void,
+  stations: RadioStation[];
+  playStation: (station: RadioStation) => void;
+  onFavorite: (station: RadioStation) => void;
 }
 
 const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavorite }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {stations.map((station) => {
         const { id, favicon, name, tags, codec } = station;
 
         return (
-          <div 
-            key={id} 
-            className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6 hover:shadow-lg transition-shadow" 
+          <div
+            key={id}
+            className="rounded-2xl border border-gray-200 bg-white p-5 transition-shadow hover:shadow-lg md:p-6 dark:border-gray-800 dark:bg-white/[0.03]"
           >
             <div className="grid grid-cols-12 gap-1">
               <div className="col-span-4">
-                <div className="flex items-center justify-center w-30 h-30 bg-gray-100 rounded-xl dark:bg-gray-800">
+                <div className="flex h-30 w-30 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800">
                   {favicon ? (
-                    <Image
-                      src={favicon}
-                      alt={name}
-                      width={60}
-                      height={60}
-                      className="rounded"
-                    />
+                    <Image src={favicon} alt={name} width={60} height={60} className="rounded" />
                   ) : (
-                    <GroupIcon className="text-gray-800 size-6 dark:text-white/90" />
+                    <GroupIcon className="size-6 text-gray-800 dark:text-white/90" />
                   )}
                 </div>
               </div>
 
               <div className="col-span-8">
                 <div>
-                  <h6 className="font-bold text-gray-800 text-title-sm dark:text-white/90">
+                  <h6 className="text-title-sm font-bold text-gray-800 dark:text-white/90">
                     {truncateString(name, 15)}
                   </h6>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -55,7 +49,7 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
               </div>
               <div className="col-span-6 mt-3">
                 <button
-                  className="w-full bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 px-4 py-2 rounded-r-md"
+                  className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 w-full rounded-r-md px-4 py-2 text-white"
                   onClick={() => playStation(station)}
                 >
                   Play
@@ -63,7 +57,7 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
               </div>
               <div className="col-span-6 mt-3">
                 <button
-                  className="w-full bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 px-4 py-2 rounded-r-md"
+                  className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 w-full rounded-r-md px-4 py-2 text-white"
                   onClick={() => onFavorite(station)}
                 >
                   Favorite

@@ -1,10 +1,10 @@
-import { Metadata } from "next";
-import AllStations from "./AllStations";
-import React from "react";
+import { Metadata } from 'next';
+import AllStations from './AllStations';
+import React from 'react';
 
 export const metadata: Metadata = {
-  title: "Radio Player",
-  description: "Internet radio player",
+  title: 'Radio Player',
+  description: 'Internet radio player',
 };
 
 export default function Stations() {

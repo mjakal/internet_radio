@@ -1,15 +1,15 @@
-import React from "react";
+import React from 'react';
 
 export default function OneIsToOne() {
   return (
-    <div className="overflow-hidden rounded-lg aspect-square">
+    <div className="aspect-square overflow-hidden rounded-lg">
       <iframe
         src="https://www.youtube.com/embed/dQw4w9WgXcQ"
         title="YouTube video"
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
-        className="w-full h-full"
+        className="h-full w-full"
       ></iframe>
     </div>
   );

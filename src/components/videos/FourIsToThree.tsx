@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default function FourIsToThree() {
   return (
@@ -9,7 +9,7 @@ export default function FourIsToThree() {
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
-        className="w-full h-full"
+        className="h-full w-full"
       ></iframe>
     </div>
   );

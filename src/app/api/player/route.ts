@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { type ChildProcess } from 'child_process';
 import { setTimeout } from 'timers/promises';
-import { RadioStation } from "@/app/types";
+import { RadioStation } from '@/app/types';
 // @ts-expect-error: play-sound has no type definitions
 import play from 'play-sound';
 
@@ -44,10 +44,7 @@ export function GET() {
     return NextResponse.json({ playback: true, data: station });
   } catch (error) {
     console.error('Error in GET handler:', error);
-    return NextResponse.json(
-      { playback: false, data: {} },
-      { status: 500 },
-    );
+    return NextResponse.json({ playback: false, data: {} }, { status: 500 });
   }
 }
 
@@ -58,21 +55,18 @@ export async function POST(request: Request) {
 
     // Kill process before starting playback
     const isRunning = getProcessStatus();
-    
+
     if (isRunning) await killProcess();
-    
+
     CACHED_STATION['station'] = { ...data };
     CACHED_STATION['process'] = player.play(stationURL, (error: undefined) => {
       if (error) console.error('Playback Error:', error);
     });
-    
+
     return NextResponse.json({ data });
   } catch (error) {
     console.error('Error in POST handler:', error);
-    return NextResponse.json(
-      { error: 'API request failed.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
   }
 }
 
@@ -83,9 +77,6 @@ export function DELETE() {
     return NextResponse.json({ playback: false, data: {} });
   } catch (error) {
     console.error('Error in GET handler:', error);
-    return NextResponse.json(
-      { playback: false, data: {} },
-      { status: 500 },
-    );
+    return NextResponse.json({ playback: false, data: {} }, { status: 500 });
   }
 }

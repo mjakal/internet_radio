@@ -22,31 +22,35 @@ let lastServerFetch: number = 0;
 
 async function getRadioBrowserServers(): Promise<string[]> {
   const ONE_HOUR = 3600000;
-  
+
   // Return cached servers if available and not expired
-  if (cachedServers.length > 0 && (Date.now() - lastServerFetch) < ONE_HOUR) {
+  if (cachedServers.length > 0 && Date.now() - lastServerFetch < ONE_HOUR) {
     return cachedServers;
   }
 
   try {
     // Get list of radio browser servers using DNS SRV lookup
     const servers = await resolveSrv('_api._tcp.radio-browser.info');
-    cachedServers = servers.map(server => server.name);
+    cachedServers = servers.map((server) => server.name);
     lastServerFetch = Date.now();
     return cachedServers;
   } catch (error) {
     console.error('Failed to fetch radio browser servers:', error);
     // Fallback servers if DNS lookup fails
-    return ['de1.api.radio-browser.info', 'nl1.api.radio-browser.info', 'at1.api.radio-browser.info'];
+    return [
+      'de1.api.radio-browser.info',
+      'nl1.api.radio-browser.info',
+      'at1.api.radio-browser.info',
+    ];
   }
 }
 
-async function fetchRadioBrowserStations(searchParams?: { 
-  query?: string, 
-  tag?: string, 
-  country?: string, 
-  limit?: number,
-  offset?: number 
+async function fetchRadioBrowserStations(searchParams?: {
+  query?: string;
+  tag?: string;
+  country?: string;
+  limit?: number;
+  offset?: number;
 }) {
   try {
     const servers = await getRadioBrowserServers();
@@ -61,14 +65,14 @@ async function fetchRadioBrowserStations(searchParams?: {
         .replace(/^switzerland$/i, 'Switzerland')
         .replace(/^swiss$/i, 'Switzerland');
     }
-    
+
     let endpoint = 'stations';
     const params = new URLSearchParams({
       limit: (searchParams?.limit || '100').toString(),
       offset: (searchParams?.offset || '0').toString(),
       hidebroken: 'true',
       order: 'clickcount',
-      reverse: 'true'
+      reverse: 'true',
     });
 
     if (normalizedCountry) {
@@ -82,8 +86,8 @@ async function fetchRadioBrowserStations(searchParams?: {
     const response = await fetch(`https://${server}/json/${endpoint}?${params}`, {
       headers: {
         'User-Agent': 'InternetRadioApp/1.0',
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     if (!response.ok) {
@@ -99,7 +103,7 @@ async function fetchRadioBrowserStations(searchParams?: {
       tags: station.tags,
       codec: station.codec,
       votes: station.votes,
-      clickcount: station.clickcount
+      clickcount: station.clickcount,
     }));
   } catch (error) {
     console.error('Error fetching radio stations:', error);
@@ -121,15 +125,12 @@ export async function GET(request: Request) {
       tag,
       country,
       limit,
-      offset
+      offset,
     });
 
     return NextResponse.json(stations);
   } catch (error) {
     console.error('Error in GET handler:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch radio stations' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch radio stations' }, { status: 500 });
   }
 }

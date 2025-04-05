@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import type React from "react";
-import { createContext, useState, useContext, useEffect, useRef, RefObject } from "react";
+import type React from 'react';
+import { createContext, useState, useContext, useEffect, useRef, RefObject } from 'react';
 import { Howl } from 'howler';
-import { RadioStation } from "@/app/types";
+import { RadioStation } from '@/app/types';
 
 const PLAYER_TYPE = process.env.NEXT_PLAYER || 'SERVER';
 
 const clientPlayback = (playerRef: RefObject<Howl | null>, station: RadioStation) => {
   try {
     const { current: player } = playerRef;
-      
+
     if (player) player.unload();
 
     const newPlayer = new Howl({
@@ -23,12 +23,12 @@ const clientPlayback = (playerRef: RefObject<Howl | null>, station: RadioStation
     playerRef.current = newPlayer;
 
     return 'DONE';
-  } catch(error) {
+  } catch (error) {
     console.error('API request failed:', error);
 
     return 'ERROR';
   }
-}
+};
 
 const serverPlayback = async (station: RadioStation | null) => {
   try {
@@ -39,12 +39,12 @@ const serverPlayback = async (station: RadioStation | null) => {
     });
 
     return 'DONE';
-  } catch(error) {
+  } catch (error) {
     console.error('API request failed:', error);
 
     return 'ERROR';
   }
-}
+};
 
 type PlayerContextType = {
   station: RadioStation | null;
@@ -54,9 +54,7 @@ type PlayerContextType = {
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
-export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [station, setStation] = useState<RadioStation | null>(null);
   const playerRef = useRef<Howl | null>(null);
 
@@ -70,10 +68,10 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({
         if (playback) setStation({ ...data });
 
         console.log('player status', data);
-      } catch(error) {
+      } catch (error) {
         console.error('API request failed:', error);
       }
-    }
+    };
 
     // Early exit - client side playback
     if (PLAYER_TYPE === 'CLIENT') return;
@@ -85,12 +83,13 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({
     // Early exit - station not defined
     if (!station) return;
 
-    const playbackStatus = PLAYER_TYPE === 'SERVER' ? await serverPlayback(station) : clientPlayback(playerRef, station);
+    const playbackStatus =
+      PLAYER_TYPE === 'SERVER' ? await serverPlayback(station) : clientPlayback(playerRef, station);
 
     if (playbackStatus === 'ERROR') return;
-    
+
     setStation(station);
-  }
+  };
 
   const stopPlayback = () => {
     if (PLAYER_TYPE === 'SERVER') {
@@ -102,7 +101,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({
       const { current: player } = playerRef;
 
       if (!player) return;
-        
+
       player.unload();
 
       playerRef.current = null;
@@ -120,10 +119,10 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const usePlayer = () => {
   const context = useContext(PlayerContext);
-  
+
   if (context === undefined) {
-    throw new Error("usePlayer must be used within a PlayerProvider");
+    throw new Error('usePlayer must be used within a PlayerProvider');
   }
-  
+
   return context;
 };

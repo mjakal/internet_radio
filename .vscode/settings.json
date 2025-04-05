@@ -1,0 +1,25 @@
+{
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  },
+  "eslint.alwaysShowStatus": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/public": true,
+    "**/node_modules": true,
+    "**/build": true,
+    "**/.next/**": true
+  },
+  "files.watcherExclude": {
+    "**/.git/**": true,
+    "**/.DS_Store": true,
+    "**/public/**": true,
+    "**/node_modules/**": true,
+    "**/build/**": true,
+    "**/.next/**": true,
+    "**/src/scss/style.css": true
+  }
+}
