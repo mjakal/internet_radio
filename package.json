@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start -H 0.0.0.0",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint-fix" : "next lint --fix"
   },
   "dependencies": {
     "@react-jvectormap/core": "^1.0.4",
