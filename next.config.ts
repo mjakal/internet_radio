@@ -1,11 +1,11 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
-      use: ["@svgr/webpack"],
+      use: ['@svgr/webpack'],
     });
     return config;
   },
@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
       {
         protocol: 'http',
         hostname: '*',
-      }
+      },
     ],
     unoptimized: true, // Allow loading from any source since radio stations might use various image hosting setups
   },
