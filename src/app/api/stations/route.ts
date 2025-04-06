@@ -5,15 +5,14 @@ import { promisify } from 'util';
 const resolveSrv = promisify(dns.resolveSrv);
 
 interface RadioBrowserStation {
+  stationuuid: string;
   name: string;
+  url_resolved?: string;
   url: string;
   favicon: string;
   tags: string;
-  stationuuid: string;
-  url_resolved?: string;
   codec?: string;
-  votes?: number;
-  clickcount?: number;
+  bitrate?: number;
 }
 
 // Cache the server list for 1 hour
@@ -95,16 +94,28 @@ async function fetchRadioBrowserStations(searchParams?: {
     }
 
     const data = await response.json();
-    return data.map((station: RadioBrowserStation) => ({
-      id: station.stationuuid,
-      name: station.name,
-      url: station.url_resolved || station.url,
-      favicon: station.favicon,
-      tags: station.tags,
-      codec: station.codec,
-      votes: station.votes,
-      clickcount: station.clickcount,
-    }));
+    return data.map(
+      ({
+        stationuuid,
+        name,
+        url_resolved,
+        url,
+        favicon,
+        tags,
+        codec,
+        bitrate,
+      }: RadioBrowserStation) => {
+        return {
+          station_id: stationuuid,
+          name,
+          url: url_resolved || url,
+          favicon,
+          tags,
+          codec,
+          bitrate,
+        };
+      },
+    );
   } catch (error) {
     console.error('Error fetching radio stations:', error);
     throw error;

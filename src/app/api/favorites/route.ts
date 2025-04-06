@@ -15,11 +15,10 @@ export function GET() {
 
 export async function POST(request: Request) {
   try {
-    const stationData: RadioStation = await request.json(); // Parse JSON body
-    const dbData = { station_id: stationData.id, ...stationData };
-    const result = addFavorite(dbData);
+    const data: RadioStation = await request.json(); // Parse JSON body
+    const result = addFavorite(data);
 
-    return NextResponse.json({ data: { id: result.station_id, ...result } });
+    return NextResponse.json({ data: { ...result } });
   } catch (error) {
     console.error('Error in POST handler:', error);
     return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
@@ -28,9 +27,9 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const data: RadioStation = await request.json(); // Parse JSON body
+    const data: RadioStation = await request.json();
 
-    deleteFavorite(data.id);
+    deleteFavorite(data.station_id);
 
     return NextResponse.json({ data });
   } catch (error) {

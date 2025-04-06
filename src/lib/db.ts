@@ -9,12 +9,11 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     station_id VARCHAR(36) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
-    url VARCHAR(1000) NOT NULL,
-    favicon VARCHAR(1000),
+    url TEXT NOT NULL,
+    favicon TEXT,
     tags VARCHAR(1000),
     codec VARCHAR(10),
-    votes INTEGER,
-    clickcount INTEGER,
+    bitrate INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
@@ -22,7 +21,7 @@ db.exec(`
 export function getFavorites() {
   return db
     .prepare(
-      'SELECT station_id AS id, name, url, favicon, tags, codec, votes, clickcount FROM favorites ORDER BY created_at',
+      'SELECT station_id, name, url, favicon, tags, codec, bitrate FROM favorites ORDER BY created_at',
     )
     .all();
 }
@@ -34,11 +33,10 @@ export function addFavorite(favorite: {
   favicon?: string;
   tags?: string;
   codec?: string;
-  votes?: number;
-  clickcount?: number;
+  bitrate?: number;
 }) {
   const stmt = db.prepare(
-    'INSERT INTO favorites (station_id, name, url, favicon, tags, codec, votes, clickcount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO favorites (station_id, name, url, favicon, tags, codec, bitrate) VALUES (?, ?, ?, ?, ?, ?, ?)',
   );
   return stmt.run(
     favorite.station_id,
@@ -47,8 +45,7 @@ export function addFavorite(favorite: {
     favorite.favicon,
     favorite.tags,
     favorite.codec,
-    favorite.votes,
-    favorite.clickcount,
+    favorite.bitrate,
   );
 }
 

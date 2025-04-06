@@ -16,11 +16,11 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {stations.map((station) => {
-        const { id, favicon, name, tags, codec } = station;
+        const { station_id, favicon, name, tags, codec, bitrate } = station;
 
         return (
           <div
-            key={id}
+            key={station_id}
             className="rounded-2xl border border-gray-200 bg-white p-5 transition-shadow hover:shadow-lg md:p-6 dark:border-gray-800 dark:bg-white/[0.03]"
           >
             <div className="grid grid-cols-12 gap-1">
@@ -43,7 +43,7 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
                     {truncateString(tags, 100)}
                   </p>
                   <Badge color="success">
-                    <AudioIcon /> {codec || 'MP3'}
+                    <AudioIcon /> {`${codec || ''} ${bitrate + ' kbps' || ''}`}
                   </Badge>
                 </div>
               </div>

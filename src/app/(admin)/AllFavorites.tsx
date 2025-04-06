@@ -36,7 +36,7 @@ export default function AllFavorites() {
       const { data } = await response.json();
 
       setStations((prevState) => {
-        return prevState.filter((item) => item.id !== station.id);
+        return prevState.filter((item) => item.station_id !== station.station_id);
       });
     } catch (error) {
       console.error('API request failed:', error);
