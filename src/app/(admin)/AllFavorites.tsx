@@ -35,7 +35,9 @@ export default function AllFavorites() {
       });
       const { data } = await response.json();
 
-      setStations(data);
+      setStations((prevState) => {
+        return prevState.filter((item) => item.id !== station.id);
+      });
     } catch (error) {
       console.error('API request failed:', error);
     }
