@@ -2,6 +2,8 @@ import next from 'next';
 import http from 'http';
 import { spawn } from 'child_process';
 
+const app = next({ dev: false });
+const handle = app.getRequestHandler();
 let vlcProcess = null;
 
 export const startVLCServer = () => {
@@ -17,15 +19,12 @@ export const startVLCServer = () => {
 };
 
 export const stopVLCServer = () => {
-  if (vlcProcess) {
-    vlcProcess.kill();
-    vlcProcess = null;
-    console.log('VLC server stopped');
-  }
-};
+  if (!vlcProcess) return;
 
-const app = next({ dev: false });
-const handle = app.getRequestHandler();
+  vlcProcess.kill();
+  vlcProcess = null;
+  console.log('VLC server stopped');
+};
 
 app.prepare().then(() => {
   startVLCServer(); // Start VLC server
@@ -50,6 +49,7 @@ app.prepare().then(() => {
   // Handle exit signals
   process.on('SIGINT', shutdown); // Ctrl+C
   process.on('SIGTERM', shutdown); // e.g. Docker stop
+
   process.on('exit', () => {
     stopVLCServer();
   });
