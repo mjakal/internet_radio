@@ -1,3 +1,8 @@
+/* I need to implement vlc server instead of child_process crap
+ * Start VLC server: vlc -I http --http-port=9090
+ * API docs: https://wiki.videolan.org/VLC_HTTP_requests/
+ */
+
 import { NextResponse } from 'next/server';
 import { type ChildProcess } from 'child_process';
 import { setTimeout } from 'timers/promises';
@@ -52,6 +57,8 @@ export async function POST(request: Request) {
   try {
     const data = await request.json(); // Parse JSON body
     const { url: stationURL } = data;
+
+    console.log('url', stationURL);
 
     // Kill process before starting playback
     const isRunning = getProcessStatus();

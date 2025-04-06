@@ -33,7 +33,8 @@ export default function AllFavorites() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(station),
       });
-      const { data } = await response.json();
+
+      await response.json();
 
       setStations((prevState) => {
         return prevState.filter((item) => item.station_id !== station.station_id);
