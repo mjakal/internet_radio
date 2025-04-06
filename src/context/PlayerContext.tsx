@@ -5,7 +5,7 @@ import { createContext, useState, useContext, useEffect, useRef, RefObject } fro
 import { Howl } from 'howler';
 import { RadioStation } from '@/app/types';
 
-const PLAYER_TYPE = process.env.NEXT_PLAYER || 'SERVER';
+const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'SERVER';
 
 const clientPlayback = (playerRef: RefObject<Howl | null>, station: RadioStation) => {
   try {
@@ -66,8 +66,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         const { playback, data } = await response.json();
 
         if (playback) setStation({ ...data });
-
-        console.log('player status', data);
       } catch (error) {
         console.error('API request failed:', error);
       }
