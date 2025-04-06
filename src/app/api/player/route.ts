@@ -1,6 +1,10 @@
 /* I need to implement vlc server instead of child_process crap
- * Start VLC server: vlc -I http --http-port=9090
+ * set password: vlc -I http --http-password=mySecretPassword
+ * Start VLC server: vlc -I http --http-port=9090 --http-password=mySecretPassword
  * API docs: https://wiki.videolan.org/VLC_HTTP_requests/
+ * play: curl http://localhost:9090/requests/status.xml\?command\=in_play\&input\=https://stream.live.vc.bbcmedia.co.uk/bbc_world_service
+ * stop: curl http://127.0.0.1:9090/requests/status.xml\?command\=pl_stop
+ * status:
  */
 
 import { NextResponse } from 'next/server';
