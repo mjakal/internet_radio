@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
-import { PlayIcon, StarIcon } from '@heroicons/react/24/solid';
+import { SignalIcon, StarIcon } from '@heroicons/react/24/solid';
 import { RadioStation } from '@/app/types';
 import { truncateString } from '@/helpers';
 
@@ -58,7 +58,7 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
                     title="Play Station"
                     onClick={() => playStation(station)}
                   >
-                    <PlayIcon className="h-6 w-6" />
+                    <SignalIcon className="h-6 w-6" />
                   </button>
                   <button
                     type="button"
