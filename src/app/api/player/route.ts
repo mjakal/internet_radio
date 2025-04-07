@@ -1,54 +1,63 @@
-/* I need to implement vlc server instead of child_process crap
- * set password: vlc -I http --http-password=mySecretPassword
- * Start VLC server: vlc -I http --http-port=9090 --http-password=mySecretPassword
- * API docs: https://wiki.videolan.org/VLC_HTTP_requests/
- * play: curl http://localhost:9090/requests/status.xml\?command\=in_play\&input\=https://stream.live.vc.bbcmedia.co.uk/bbc_world_service
- * stop: curl http://127.0.0.1:9090/requests/status.xml\?command\=pl_stop
- * status:
+/*
+ * Start VLC server with password
+ * vlc -I http --http-port=9090 --http-password=mySecretPassword
+ * VLC Server API Docs:
+ * https://wiki.videolan.org/VLC_HTTP_requests/
  */
 
 import { NextResponse } from 'next/server';
-import { type ChildProcess } from 'child_process';
-import { setTimeout } from 'timers/promises';
+import { parseStringPromise } from 'xml2js';
 import { RadioStation } from '@/app/types';
-// @ts-expect-error: play-sound has no type definitions
-import play from 'play-sound';
 
-// Use VLC headless mode
-const player = play({ players: ['cvlc'] });
+const VLC_BASE_URL = process.env.NEXT_VLC_BASE_URL || '';
+const VLC_USERNAME = process.env.NEXT_VLC_USERNAME || '';
+const VLC_PASSWORD = process.env.NEXT_VLC_PASSWORD || '';
 
+// Encode credentials to Base64
+const VLC_AUTH = Buffer.from(`${VLC_USERNAME}:${VLC_PASSWORD}`).toString('base64');
 const CACHED_STATION: {
   station: RadioStation | null;
-  process: ChildProcess | null;
+  fallbackStation: RadioStation;
 } = {
   station: null,
-  process: null,
+  fallbackStation: {
+    station_id: 'fallback_station',
+    name: 'Fallback Station',
+    url: '',
+    favicon: '',
+    tags: 'No info',
+    codec: 'MP3',
+    bitrate: 64,
+  },
 };
 
-function getProcessStatus() {
-  const { process } = CACHED_STATION;
+async function vlcAPIHandler(urlSuffix: string) {
+  const requestURL = `${VLC_BASE_URL}${urlSuffix}`;
 
-  if (!process || !process.pid) return false;
+  const response = await fetch(requestURL, {
+    method: 'GET',
+    headers: { Authorization: `Basic ${VLC_AUTH}` },
+  });
 
-  return true;
+  const xmlResponse = await response.text(); // Get response as string
+  const jsonResponse = await parseStringPromise(xmlResponse); // Convert XML to JSON
+
+  return jsonResponse;
 }
 
-async function killProcess() {
-  CACHED_STATION.process?.kill();
-
-  CACHED_STATION.station = null;
-  CACHED_STATION.process = null;
-
-  await setTimeout(100);
-}
-
-export function GET() {
+export async function GET() {
   try {
-    const isRunning = getProcessStatus();
+    const apiURL = `status.xml`;
+    const response = await await vlcAPIHandler(apiURL);
 
-    if (!isRunning) return NextResponse.json({ playback: false, data: {} });
+    const playbackStatus = response?.root?.state[0];
+    const isPlaying = playbackStatus === 'playing';
 
-    const { station } = CACHED_STATION;
+    if (!isPlaying) return NextResponse.json({ playback: false, data: null });
+
+    const { station, fallbackStation } = CACHED_STATION;
+
+    if (!station) return NextResponse.json({ playback: true, data: { ...fallbackStation } });
 
     return NextResponse.json({ playback: true, data: station });
   } catch (error) {
@@ -61,18 +70,12 @@ export async function POST(request: Request) {
   try {
     const data = await request.json(); // Parse JSON body
     const { url: stationURL } = data;
+    const encodedURL = encodeURIComponent(stationURL);
+    const apiURL = `status.xml\?command\=in_play\&input\=${encodedURL}`;
 
-    console.log('url', stationURL);
-
-    // Kill process before starting playback
-    const isRunning = getProcessStatus();
-
-    if (isRunning) await killProcess();
+    await vlcAPIHandler(apiURL);
 
     CACHED_STATION['station'] = { ...data };
-    CACHED_STATION['process'] = player.play(stationURL, (error: undefined) => {
-      if (error) console.error('Playback Error:', error);
-    });
 
     return NextResponse.json({ data });
   } catch (error) {
@@ -81,9 +84,13 @@ export async function POST(request: Request) {
   }
 }
 
-export function DELETE() {
+export async function DELETE() {
   try {
-    killProcess();
+    const apiURL = `status.xml\?command\=pl_stop`;
+
+    await vlcAPIHandler(apiURL);
+
+    CACHED_STATION['station'] = null;
 
     return NextResponse.json({ playback: false, data: {} });
   } catch (error) {

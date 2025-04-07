@@ -25,7 +25,9 @@ Create a .env file and add all the required keys.
 
 ```
 NEXT_PUBLIC_PLAYER=SERVER # CLIENT || SERVER
-NEXT_PUBLIC_PLAYER_PORT=9090 # specify the port for the VLC serve
+NEXT_VLC_BASE_URL=http://127.0.0.1:9090/requests/
+NEXT_VLC_USERNAME= # leave it blank - vlc docs
+NEXT_VLC_PASSWORD=mySecretPassword # you should probably change it :)
 ```
 
 Once you have configured the .env file, run the commands below.
@@ -38,7 +40,8 @@ npm run dev
 If you're using server-side playback, you must start the VLC server in a separate process by running the command below.
 
 ```
-vlc -I http --http-port=9090
+# NOTE: VLC password must match the one set in the .env file
+vlc -I http --http-port=9090 --http-password=mySecretPassword
 ```
 
 That's it! Now you can open your browser and visit...
