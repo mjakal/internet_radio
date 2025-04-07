@@ -1,8 +1,7 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
-import Badge from '../ui/badge/Badge';
-import { PlayIcon, HeartIcon } from '@heroicons/react/24/solid';
+import { PlayIcon, StarIcon } from '@heroicons/react/24/solid';
 import { RadioStation } from '@/app/types';
 import { truncateString } from '@/helpers';
 
@@ -46,7 +45,9 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
                 </div>
               </div>
               <div className="ml-3 flex min-w-0 flex-col">
-                <span className="mb-1 text-right text-xs text-gray-500">9:02pm</span>
+                <span className="mb-1 text-center text-xs text-gray-400">
+                  {`${bitrate + ' kbps' || ''}`}
+                </span>
                 <div className="flex">
                   <button
                     type="button"
@@ -54,7 +55,7 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
                     title="Play Station"
                     onClick={() => playStation(station)}
                   >
-                    <PlayIcon className="h-5 w-5" />
+                    <PlayIcon className="h-6 w-6" />
                   </button>
                   <button
                     type="button"
@@ -62,7 +63,7 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
                     title="Add to favorites"
                     onClick={() => onFavorite(station)}
                   >
-                    <HeartIcon className="h-5 w-5" />
+                    <StarIcon className="h-6 w-6" />
                   </button>
                 </div>
               </div>
