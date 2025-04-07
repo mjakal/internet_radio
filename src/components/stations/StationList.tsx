@@ -2,7 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Badge from '../ui/badge/Badge';
-import { AudioIcon, GroupIcon } from '@/icons';
+import { PlayIcon, HeartIcon } from '@heroicons/react/24/solid';
 import { RadioStation } from '@/app/types';
 import { truncateString } from '@/helpers';
 
@@ -21,47 +21,50 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
         return (
           <div
             key={station_id}
-            className="rounded-2xl border border-gray-200 bg-white p-5 transition-shadow hover:shadow-lg md:p-6 dark:border-gray-800 dark:bg-white/[0.03]"
+            className="flex transform cursor-pointer flex-col rounded-2xl border-gray-200 bg-white p-4 shadow-md transition duration-500 ease-in hover:scale-105 dark:border-gray-800 dark:bg-white/[0.03]"
           >
-            <div className="grid grid-cols-12 gap-1">
-              <div className="col-span-4">
-                <div className="flex h-30 w-30 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800">
-                  {favicon ? (
-                    <Image src={favicon} alt={name} width={60} height={60} className="rounded" />
-                  ) : (
-                    <GroupIcon className="size-6 text-gray-800 dark:text-white/90" />
-                  )}
+            <div className="flex items-center justify-between">
+              <div className="mr-auto flex items-center">
+                <div className="inline-flex h-12 w-12">
+                  <Image
+                    src={favicon ? favicon : ''}
+                    width={100}
+                    height={100}
+                    alt="aji"
+                    className="relative h-12 w-12 rounded-2xl object-cover p-1"
+                  />
+                  <span className="absolute inline-flex h-12 w-12 rounded-2xl border-2 border-gray-500 opacity-75" />
+                  <span />
                 </div>
-              </div>
-
-              <div className="col-span-8">
-                <div>
-                  <h6 className="text-title-sm font-bold text-gray-800 dark:text-white/90">
-                    {truncateString(name, 15)}
-                  </h6>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {truncateString(tags, 100)}
+                <div className="ml-3 flex min-w-0 flex-col">
+                  <div className="leading-none font-medium text-gray-100">
+                    {truncateString(name, 50)}
+                  </div>
+                  <p className="mt-1 truncate text-sm leading-none text-gray-200">
+                    {truncateString(tags, 50)}
                   </p>
-                  <Badge color="success">
-                    <AudioIcon /> {`${codec || ''} ${bitrate + ' kbps' || ''}`}
-                  </Badge>
                 </div>
               </div>
-              <div className="col-span-6 mt-3">
-                <button
-                  className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 w-full rounded-r-md px-4 py-2 text-white"
-                  onClick={() => playStation(station)}
-                >
-                  Play
-                </button>
-              </div>
-              <div className="col-span-6 mt-3">
-                <button
-                  className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 w-full rounded-r-md px-4 py-2 text-white"
-                  onClick={() => onFavorite(station)}
-                >
-                  Favorite
-                </button>
+              <div className="ml-3 flex min-w-0 flex-col">
+                <span className="mb-1 text-right text-xs text-gray-500">9:02pm</span>
+                <div className="flex">
+                  <button
+                    type="button"
+                    className="flex-no-shrink mr-2 text-xs font-medium tracking-wider text-gray-500 transition duration-300 ease-in hover:text-green-600"
+                    title="Play Station"
+                    onClick={() => playStation(station)}
+                  >
+                    <PlayIcon className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    className="flex-no-shrink mr-2 text-xs font-medium tracking-wider text-gray-500 transition duration-300 ease-in hover:text-green-300"
+                    title="Add to favorites"
+                    onClick={() => onFavorite(station)}
+                  >
+                    <HeartIcon className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

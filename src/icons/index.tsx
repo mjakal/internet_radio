@@ -44,6 +44,7 @@ import TableIcon from './table.svg';
 import PageIcon from './page.svg';
 import PieChartIcon from './pie-chart.svg';
 import BoxCubeIcon from './box-cube.svg';
+import PlayStreamIcon from './play-stream.svg';
 import PlugInIcon from './plug-in.svg';
 import DocsIcon from './docs.svg';
 import MailIcon from './mail-line.svg';
@@ -51,6 +52,7 @@ import HorizontaLDots from './horizontal-dots.svg';
 import ChatIcon from './chat.svg';
 import MoreDotIcon from './more-dot.svg';
 import BellIcon from './bell.svg';
+import StarIcon from './star.svg';
 
 export {
   DownloadIcon,
@@ -101,9 +103,11 @@ export {
   PieChartIcon,
   BoxCubeIcon,
   PlugInIcon,
+  PlayStreamIcon,
   DocsIcon,
   MailIcon,
   HorizontaLDots,
   ChevronUpIcon,
   ChatIcon,
+  StarIcon,
 };
