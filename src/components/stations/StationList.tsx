@@ -15,7 +15,7 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {stations.map((station) => {
-        const { station_id, favicon, name, tags, codec, bitrate } = station;
+        const { station_id, favicon, name, tags, bitrate } = station;
 
         return (
           <div
@@ -37,12 +37,12 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
                 </div>
                 <div className="ml-3 flex min-w-0 flex-col">
                   <div
-                    className="leading-none font-medium text-gray-100"
+                    className="leading-none font-medium text-gray-800 dark:text-gray-100"
                     onClick={() => playStation(station)}
                   >
                     {truncateString(name, 50)}
                   </div>
-                  <p className="mt-1 truncate text-sm leading-none text-gray-200">
+                  <p className="mt-1 truncate text-sm leading-none text-gray-400 dark:text-gray-200">
                     {truncateString(tags, 50)}
                   </p>
                 </div>
