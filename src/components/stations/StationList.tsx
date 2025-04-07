@@ -26,10 +26,10 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
               <div className="mr-auto flex items-center">
                 <div className="inline-flex h-12 w-12">
                   <Image
-                    src={favicon ? favicon : '/umages/radio-favicon.jpg'}
+                    src={favicon ? favicon : '/images/cards/station-fallback.jpg'}
                     width={100}
                     height={100}
-                    alt="aji"
+                    alt={name}
                     className="relative h-12 w-12 rounded-2xl object-cover p-1"
                   />
                   <span className="absolute inline-flex h-12 w-12 rounded-2xl border-2 border-gray-500 opacity-75" />
@@ -37,7 +37,7 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
                 </div>
                 <div className="ml-3 flex min-w-0 flex-col">
                   <div
-                    className="leading-none font-medium text-gray-800 dark:text-gray-100"
+                    className="leading-none font-medium text-gray-800 dark:text-gray-200"
                     onClick={() => playStation(station)}
                   >
                     {truncateString(name, 50)}
@@ -49,7 +49,7 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
               </div>
               <div className="ml-3 flex min-w-0 flex-col">
                 <span className="mb-1 text-center text-xs text-gray-400">
-                  {`${bitrate + ' kbps' || ''}`}
+                  {bitrate ? bitrate + ' kbps' : '64 kbps'}
                 </span>
                 <div className="flex">
                   <button
