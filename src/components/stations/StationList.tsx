@@ -26,7 +26,7 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
               <div className="mr-auto flex items-center">
                 <div className="inline-flex h-12 w-12">
                   <Image
-                    src={favicon ? favicon : ''}
+                    src={favicon ? favicon : '/umages/radio-favicon.jpg'}
                     width={100}
                     height={100}
                     alt="aji"
@@ -36,7 +36,10 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
                   <span />
                 </div>
                 <div className="ml-3 flex min-w-0 flex-col">
-                  <div className="leading-none font-medium text-gray-100">
+                  <div
+                    className="leading-none font-medium text-gray-100"
+                    onClick={() => playStation(station)}
+                  >
                     {truncateString(name, 50)}
                   </div>
                   <p className="mt-1 truncate text-sm leading-none text-gray-200">
