@@ -9,6 +9,14 @@ import { NextResponse } from 'next/server';
 import { parseStringPromise } from 'xml2js';
 import { RadioStation } from '@/app/types';
 
+const JSON_OPTIONS = {
+  explicitArray: false, // Always put child nodes in arrays
+  explicitCharkey: true, // Use a custom key for text content
+  charkey: 'value', // Instead of '_'
+  attrkey: 'attrs', // Instead of '$'
+  mergeAttrs: true, // Merge attributes directly onto the object
+  trim: true, // Remove surrounding whitespace
+};
 const VLC_BASE_URL = process.env.NEXT_VLC_BASE_URL || '';
 const VLC_USERNAME = process.env.NEXT_VLC_USERNAME || '';
 const VLC_PASSWORD = process.env.NEXT_VLC_PASSWORD || '';
@@ -17,18 +25,8 @@ const VLC_PASSWORD = process.env.NEXT_VLC_PASSWORD || '';
 const VLC_AUTH = Buffer.from(`${VLC_USERNAME}:${VLC_PASSWORD}`).toString('base64');
 const CACHED_STATION: {
   station: RadioStation | null;
-  fallbackStation: RadioStation;
 } = {
   station: null,
-  fallbackStation: {
-    station_id: 'fallback_station',
-    name: 'Fallback Station',
-    url: '',
-    favicon: '',
-    tags: 'No info',
-    codec: 'MP3',
-    bitrate: 64,
-  },
 };
 
 async function vlcAPIHandler(urlSuffix: string) {
@@ -40,7 +38,7 @@ async function vlcAPIHandler(urlSuffix: string) {
   });
 
   const xmlResponse = await response.text(); // Get response as string
-  const jsonResponse = await parseStringPromise(xmlResponse); // Convert XML to JSON
+  const jsonResponse = await parseStringPromise(xmlResponse, JSON_OPTIONS); // Convert XML to JSON
 
   return jsonResponse;
 }
@@ -48,22 +46,25 @@ async function vlcAPIHandler(urlSuffix: string) {
 async function getStatus() {
   const response = await vlcAPIHandler(`status.xml`);
 
-  const playbackStatus = response?.root?.state[0];
+  const playbackStatus = response?.root?.state?.value;
   const isPlaying = playbackStatus === 'playing';
 
   if (!isPlaying) return { playback: false, data: null };
 
-  const { station, fallbackStation } = CACHED_STATION;
-
-  if (!station) return { playback: true, data: { ...fallbackStation } };
+  const { station } = CACHED_STATION;
 
   return { playback: true, data: station };
 }
 
 async function getPlaylist() {
-  const response = await vlcAPIHandler(`playlist.xml`);
+  const response = await vlcAPIHandler(`status.xml`);
 
-  return { playback: true, data: response };
+  // Get deep nested now playing info from vlc api
+  const categoryInfo = response?.root?.information?.category[0]?.info;
+  const metaInfo = Array.isArray(categoryInfo) ? categoryInfo : [];
+  const nowPlaying = metaInfo.find(({ name }) => name === 'now_playing')?.['value'] || '';
+
+  return { nowPlaying };
 }
 
 export async function GET(request: Request) {
@@ -76,7 +77,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ ...response });
   } catch (error) {
     console.error('Error in GET handler:', error);
-    return NextResponse.json({ playback: false, data: {} }, { status: 500 });
+    return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
   }
 }
 

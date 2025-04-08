@@ -4,6 +4,7 @@ import { usePlayer } from '@/context/PlayerContext';
 import Image from 'next/image';
 import { SpeakerWaveIcon, AdjustmentsHorizontalIcon, StopIcon } from '@heroicons/react/24/outline';
 import { truncateString } from '@/helpers';
+import PlaylistInfo from './PlaylistInfo';
 
 const StationPlayer = () => {
   const { station, stopPlayback } = usePlayer();
@@ -36,10 +37,15 @@ const StationPlayer = () => {
                   <div className="my-1 flex-auto text-gray-400 dark:text-gray-200">
                     <span className="mr-3">{truncateString(tags, 50)}</span>
                   </div>
+                  <div className="my-1 flex-auto text-gray-400 dark:text-gray-200">
+                    <span className="mr-3">
+                      Now Playing: <PlaylistInfo station={station} />
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="mt-10 flex text-sm text-gray-400">
+            <div className="flex text-sm text-gray-400">
               <div className="inline-flex flex-1 items-center">
                 <SpeakerWaveIcon className="h-4 w-4" />
                 <p className="ms-1">{codec ? codec : 'MP3'}</p>
