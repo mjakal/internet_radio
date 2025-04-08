@@ -2,7 +2,12 @@
 import React from 'react';
 import { usePlayer } from '@/context/PlayerContext';
 import Image from 'next/image';
-import { SpeakerWaveIcon, AdjustmentsHorizontalIcon, StopIcon } from '@heroicons/react/24/outline';
+import {
+  SpeakerWaveIcon,
+  AdjustmentsHorizontalIcon,
+  StopIcon,
+  TagIcon,
+} from '@heroicons/react/24/outline';
 import { truncateString } from '@/helpers';
 import PlaylistInfo from './PlaylistInfo';
 
@@ -35,11 +40,14 @@ const StationPlayer = () => {
                     {truncateString(name, 50)}
                   </div>
                   <div className="my-1 flex-auto text-gray-400 dark:text-gray-200">
-                    <span className="mr-3">{truncateString(tags, 50)}</span>
+                    <span className="mr-3">
+                      <TagIcon className="mr-1 inline h-3 w-3" />
+                      {tags ? truncateString(tags, 50) : 'No info'}
+                    </span>
                   </div>
                   <div className="my-1 flex-auto text-gray-400 dark:text-gray-200">
                     <span className="mr-3">
-                      Now Playing: <PlaylistInfo station={station} />
+                      <PlaylistInfo station={station} />
                     </span>
                   </div>
                 </div>

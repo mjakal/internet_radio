@@ -5,7 +5,7 @@ import { createContext, useState, useContext, useEffect, useRef, RefObject } fro
 import { Howl } from 'howler';
 import { RadioStation } from '@/app/types';
 
-const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'SERVER';
+const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
 
 const clientPlayback = (playerRef: RefObject<Howl | null>, station: RadioStation) => {
   try {
