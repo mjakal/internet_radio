@@ -62,7 +62,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // Initialize Player
     const checkPlaybackStatus = async () => {
       try {
-        const response = await fetch('/api/player');
+        const response = await fetch('/api/player?type=status');
         const { playback, data } = await response.json();
 
         if (playback) setStation({ ...data });

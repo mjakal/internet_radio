@@ -45,21 +45,35 @@ async function vlcAPIHandler(urlSuffix: string) {
   return jsonResponse;
 }
 
-export async function GET() {
+async function getStatus() {
+  const response = await vlcAPIHandler(`status.xml`);
+
+  const playbackStatus = response?.root?.state[0];
+  const isPlaying = playbackStatus === 'playing';
+
+  if (!isPlaying) return { playback: false, data: null };
+
+  const { station, fallbackStation } = CACHED_STATION;
+
+  if (!station) return { playback: true, data: { ...fallbackStation } };
+
+  return { playback: true, data: station };
+}
+
+async function getPlaylist() {
+  const response = await vlcAPIHandler(`playlist.xml`);
+
+  return { playback: true, data: response };
+}
+
+export async function GET(request: Request) {
   try {
-    const apiURL = `status.xml`;
-    const response = await await vlcAPIHandler(apiURL);
+    const { searchParams } = new URL(request.url);
+    const requestType = searchParams.get('type') || 'status';
 
-    const playbackStatus = response?.root?.state[0];
-    const isPlaying = playbackStatus === 'playing';
+    const response = requestType === 'status' ? await getStatus() : await getPlaylist();
 
-    if (!isPlaying) return NextResponse.json({ playback: false, data: null });
-
-    const { station, fallbackStation } = CACHED_STATION;
-
-    if (!station) return NextResponse.json({ playback: true, data: { ...fallbackStation } });
-
-    return NextResponse.json({ playback: true, data: station });
+    return NextResponse.json({ ...response });
   } catch (error) {
     console.error('Error in GET handler:', error);
     return NextResponse.json({ playback: false, data: {} }, { status: 500 });
@@ -71,9 +85,11 @@ export async function POST(request: Request) {
     const data = await request.json(); // Parse JSON body
     const { url: stationURL } = data;
     const encodedURL = encodeURIComponent(stationURL);
-    const apiURL = `status.xml\?command\=in_play\&input\=${encodedURL}`;
 
-    await vlcAPIHandler(apiURL);
+    // await stop payback
+    await vlcAPIHandler('status.xml\?command\=pl_stop');
+    // await play audio stream
+    await vlcAPIHandler(`status.xml\?command\=in_play\&input\=${encodedURL}`);
 
     CACHED_STATION['station'] = { ...data };
 
@@ -86,9 +102,10 @@ export async function POST(request: Request) {
 
 export async function DELETE() {
   try {
-    const apiURL = `status.xml\?command\=pl_stop`;
-
-    await vlcAPIHandler(apiURL);
+    // await stop playback
+    await vlcAPIHandler(`status.xml\?command\=pl_stop`);
+    // await empty playlist
+    await vlcAPIHandler('status.xml?command=pl_empty');
 
     CACHED_STATION['station'] = null;
 
