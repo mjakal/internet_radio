@@ -62,6 +62,7 @@ export default function AllFavorites() {
             <div className="col-span-12 space-y-6 xl:col-span-12">
               <StationList
                 stations={stations}
+                type="DELETE"
                 playStation={playStation}
                 onFavorite={onDeleteFavorite}
               />

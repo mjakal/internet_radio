@@ -1,17 +1,20 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
-import { SignalIcon, StarIcon } from '@heroicons/react/24/solid';
+import { SignalIcon, StarIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { RadioStation } from '@/app/types';
 import { truncateString } from '@/helpers';
 
 interface StationListProps {
   stations: RadioStation[];
+  type: string;
   playStation: (station: RadioStation) => void;
   onFavorite: (station: RadioStation) => void;
 }
 
-const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavorite }) => {
+const StationList: React.FC<StationListProps> = ({ stations, type, playStation, onFavorite }) => {
+  const addFavorite = type === 'CREATE';
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {stations.map((station) => {
@@ -63,10 +66,14 @@ const StationList: React.FC<StationListProps> = ({ stations, playStation, onFavo
                   <button
                     type="button"
                     className="flex-no-shrink mr-2 text-xs font-medium tracking-wider text-gray-500 transition duration-300 ease-in hover:text-green-300"
-                    title="Add to favorites"
+                    title={addFavorite ? 'Add to favorites' : 'Remove from favorites'}
                     onClick={() => onFavorite(station)}
                   >
-                    <StarIcon className="h-6 w-6" />
+                    {addFavorite ? (
+                      <StarIcon className="h-6 w-6" />
+                    ) : (
+                      <TrashIcon className="h-6 w-6" />
+                    )}
                   </button>
                 </div>
               </div>

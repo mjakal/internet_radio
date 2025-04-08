@@ -104,6 +104,7 @@ export default function AllStations() {
             <div className="col-span-12 space-y-6 xl:col-span-12">
               <StationList
                 stations={stations}
+                type="CREATE"
                 playStation={playStation}
                 onFavorite={onAddFavorite}
               />
