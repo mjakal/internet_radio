@@ -9,7 +9,10 @@ import {
   TagIcon,
 } from '@heroicons/react/24/outline';
 import { truncateString } from '@/helpers';
-import PlaylistInfo from './PlaylistInfo';
+import ClientInfo from './ClientInfo';
+import ServerInfo from './ServerInfo';
+
+const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
 
 const StationPlayer = () => {
   const { station, stopPlayback } = usePlayer();
@@ -40,14 +43,14 @@ const StationPlayer = () => {
                     {truncateString(name, 50)}
                   </div>
                   <div className="my-1 flex-auto text-gray-400 dark:text-gray-200">
-                    <span className="mr-3">
-                      <TagIcon className="mr-1 inline h-3 w-3" />
+                    <span className="mr-3 overflow-hidden whitespace-nowrap">
+                      <TagIcon className="mr-1 inline h-4 w-4" />
                       {tags ? truncateString(tags, 50) : 'No info'}
                     </span>
                   </div>
                   <div className="my-1 flex-auto text-gray-400 dark:text-gray-200">
                     <span className="mr-3">
-                      <PlaylistInfo station={station} />
+                      {PLAYER_TYPE === 'SERVER' ? <ServerInfo station={station} /> : <ClientInfo />}
                     </span>
                   </div>
                 </div>

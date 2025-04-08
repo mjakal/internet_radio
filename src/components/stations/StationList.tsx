@@ -40,13 +40,13 @@ const StationList: React.FC<StationListProps> = ({ stations, type, playStation, 
                 </div>
                 <div className="ml-3 flex min-w-0 flex-col">
                   <div
-                    className="leading-none font-medium text-gray-800 dark:text-gray-200"
+                    className="w-60 truncate overflow-hidden leading-none font-medium whitespace-nowrap text-gray-800 dark:text-gray-200"
                     onClick={() => playStation(station)}
                   >
-                    {truncateString(name, 50)}
+                    {name}
                   </div>
-                  <p className="mt-1 truncate text-sm leading-none text-gray-400 dark:text-gray-200">
-                    {truncateString(tags, 50)}
+                  <p className="mt-1 w-60 truncate overflow-hidden text-sm leading-none whitespace-nowrap text-gray-400 dark:text-gray-200">
+                    {tags}
                   </p>
                 </div>
               </div>

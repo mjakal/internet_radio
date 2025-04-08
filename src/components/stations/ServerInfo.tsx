@@ -4,13 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { RadioStation } from '@/app/types';
 import { PlayCircleIcon } from '@heroicons/react/24/solid';
 
-const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
-
-interface PlaylistInfoProps {
+interface ServerInfoProps {
   station: RadioStation;
 }
 
-const PlaylistInfo: React.FC<PlaylistInfoProps> = ({ station }) => {
+const ServerInfo: React.FC<ServerInfoProps> = ({ station }) => {
   const [playlist, setPlaylist] = useState<string>('');
 
   useEffect(() => {
@@ -33,8 +31,6 @@ const PlaylistInfo: React.FC<PlaylistInfoProps> = ({ station }) => {
       }
     };
 
-    if (PLAYER_TYPE === 'CLIENT') return;
-
     const interval = setInterval(getPlaylistInfo, 5000); // every 5 seconds
 
     setPlaylist('');
@@ -42,22 +38,12 @@ const PlaylistInfo: React.FC<PlaylistInfoProps> = ({ station }) => {
     return () => clearInterval(interval);
   }, [station]);
 
-  // Early exit: station info not implemented on client playback
-  if (PLAYER_TYPE === 'CLIENT') {
-    return (
-      <span>
-        <PlayCircleIcon className="mr-1 inline h-3 w-3" />
-        No info
-      </span>
-    );
-  }
-
   return (
     <span>
-      <PlayCircleIcon className="mr-1 inline h-3 w-3" />
+      <PlayCircleIcon className="mr-1 inline h-4 w-4" />
       {playlist || 'Hang tight...'}
     </span>
   );
 };
 
-export default PlaylistInfo;
+export default ServerInfo;
