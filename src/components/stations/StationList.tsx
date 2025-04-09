@@ -3,7 +3,6 @@ import React from 'react';
 import Image from 'next/image';
 import { SignalIcon, StarIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { RadioStation } from '@/app/types';
-import { truncateString } from '@/helpers';
 
 interface StationListProps {
   stations: RadioStation[];
