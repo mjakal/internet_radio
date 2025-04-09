@@ -15,7 +15,7 @@ const StationList: React.FC<StationListProps> = ({ stations, type, playStation, 
   const addFavorite = type === 'CREATE';
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
       {stations.map((station) => {
         const { station_id, favicon, name, tags, bitrate } = station;
 
@@ -39,12 +39,12 @@ const StationList: React.FC<StationListProps> = ({ stations, type, playStation, 
                 </div>
                 <div className="ml-3 flex min-w-0 flex-col">
                   <div
-                    className="w-60 truncate overflow-hidden leading-none font-medium whitespace-nowrap text-gray-800 dark:text-gray-200"
+                    className="w-40 truncate overflow-hidden leading-none font-medium whitespace-nowrap text-gray-800 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200"
                     onClick={() => playStation(station)}
                   >
                     {name}
                   </div>
-                  <p className="mt-1 w-60 truncate overflow-hidden text-sm leading-none whitespace-nowrap text-gray-400 dark:text-gray-200">
+                  <p className="mt-1 w-40 truncate overflow-hidden text-sm leading-none whitespace-nowrap text-gray-400 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200">
                     {tags}
                   </p>
                 </div>
