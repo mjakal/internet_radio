@@ -18,7 +18,7 @@ const AppHeader: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-99999 flex w-full border-gray-200 bg-white lg:border-b dark:border-gray-800 dark:bg-gray-900">
-      <div className="flex grow flex-col items-center justify-between lg:flex-row lg:px-6">
+      <div className="flex w-full flex-row items-center px-6">
         <div className="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4 dark:border-gray-800">
           <button
             className="z-99999 h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 lg:flex lg:h-11 lg:w-11 lg:border dark:border-gray-800 dark:text-gray-400"
@@ -59,7 +59,7 @@ const AppHeader: React.FC = () => {
             {/* Cross Icon */}
           </button>
 
-          <Link href="/" className="lg:hidden">
+          <Link href="/" className="flex w-full justify-center lg:hidden">
             <Image
               width={154}
               height={32}
@@ -75,12 +75,11 @@ const AppHeader: React.FC = () => {
               alt="Logo"
             />
           </Link>
-
-          <div className="2xsm:gap-3 ms-auto flex items-center gap-2">
-            {/* <!-- Dark Mode Toggler --> */}
-            <ThemeToggleButton />
-            {/* <!-- Dark Mode Toggler --> */}
-          </div>
+        </div>
+        <div className="flex justify-end px-0">
+          {/* <!-- Dark Mode Toggler --> */}
+          <ThemeToggleButton />
+          {/* <!-- Dark Mode Toggler --> */}
         </div>
       </div>
     </header>
