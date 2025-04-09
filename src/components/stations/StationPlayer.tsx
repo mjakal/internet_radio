@@ -24,7 +24,7 @@ const StationPlayer = () => {
 
   return (
     <div className="sticky top-25 z-10 mb-6 flex flex-col">
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 transition-shadow hover:shadow-lg dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 transition-shadow hover:shadow-lg dark:border-gray-800 dark:bg-gray-900/[0.90]">
         <div className="flex-none sm:flex">
           <div className="relative mb-3 h-32 w-32 sm:mb-0">
             <Image
