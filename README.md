@@ -49,3 +49,48 @@ That's it! Now you can open your browser and visit...
 ```
 http://localhost:3000
 ```
+
+## Start VLC server on system boot Linux
+
+1. Create the service file
+
+Create a new file at:
+/etc/systemd/system/vlc-server.service
+
+```
+[Unit]
+Description=VLC HTTP Server
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/vlc -I http --http-port=9090 --http-password=mySecretPassword
+Restart=always
+User=your-username
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=multi-user.target
+```
+
+2. Replace placeholders
+
+/usr/bin/vlc: Make sure this is the correct path to VLC on your system. Check with which vlc.
+
+your-username: Replace with your Linux username.
+
+3. Enable and start the service
+
+Run these commands:
+
+```
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl enable vlc-server.service
+sudo systemctl start vlc-server.service
+# Check status
+sudo systemctl status vlc-server.service
+# Stop service
+sudo systemctl stop vlc-server.service
+# Prevent it from starting on system boot
+sudo systemctl disable vlc-server.service
+```
