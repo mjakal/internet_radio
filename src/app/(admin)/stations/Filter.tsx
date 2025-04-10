@@ -62,6 +62,8 @@ const Filter: React.FC<FilterProps> = ({ onFilter }) => {
           onChange={(event) => {
             const { value } = event.target;
 
+            if (value.length > 50) return;
+
             setFilter(value);
           }}
           onKeyDown={handleKeyDown}

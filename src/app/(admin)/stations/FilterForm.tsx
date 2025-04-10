@@ -17,12 +17,15 @@ const FilterForm: React.FC<FilterFormProps> = ({ closeModal, onFilter }) => {
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
+    if (value.length > 50) return;
+
     setQuery((prevState) => ({ ...prevState, [name]: value }));
   };
 
   const onSubmit = () => {
     const { station, tag, country } = query;
 
+    // Prevent empty from submit
     if (!station && !tag && !country) return;
 
     closeModal();
@@ -30,7 +33,7 @@ const FilterForm: React.FC<FilterFormProps> = ({ closeModal, onFilter }) => {
   };
 
   return (
-    <form className="">
+    <div className="">
       <h4 className="mb-6 text-lg font-medium text-gray-800 dark:text-white/90">Advanced Filter</h4>
 
       <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
@@ -40,6 +43,7 @@ const FilterForm: React.FC<FilterFormProps> = ({ closeModal, onFilter }) => {
             type="text"
             name="station"
             value={query.station}
+            max="30"
             onChange={onChange}
             placeholder="Station Name"
           />
@@ -51,6 +55,7 @@ const FilterForm: React.FC<FilterFormProps> = ({ closeModal, onFilter }) => {
             type="text"
             name="tag"
             value={query.tag}
+            max="30"
             onChange={onChange}
             placeholder="Station Genre"
           />
@@ -62,6 +67,7 @@ const FilterForm: React.FC<FilterFormProps> = ({ closeModal, onFilter }) => {
             type="text"
             name="country"
             value={query.country}
+            max="30"
             onChange={onChange}
             placeholder="Station Country"
           />
@@ -76,7 +82,7 @@ const FilterForm: React.FC<FilterFormProps> = ({ closeModal, onFilter }) => {
           Filter Stations
         </Button>
       </div>
-    </form>
+    </div>
   );
 };
 
