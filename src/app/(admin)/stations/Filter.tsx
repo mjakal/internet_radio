@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
-import { Modal } from '@/components/ui/modal';
+import AdvancedFilter from './AdvancedFilter';
+import { useModal } from '@/hooks/useModal';
 
 interface FilterProps {
   onChange: (filter: string) => void;
@@ -30,7 +31,7 @@ const FilterIcon = () => (
 
 const Filter: React.FC<FilterProps> = ({ onChange }) => {
   const [filter, setFilter] = useState<string>('');
-  const [modal, setModal] = useState<boolean>(false);
+  const { isOpen, openModal, closeModal } = useModal();
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
@@ -72,7 +73,7 @@ const Filter: React.FC<FilterProps> = ({ onChange }) => {
           type="button"
           className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 px-4 py-2 text-white"
           title="Advanced Filter"
-          onClick={() => setModal(true)}
+          onClick={openModal}
         >
           <AdjustmentsHorizontalIcon className="inline-block h-4 w-4" />
         </button>
@@ -84,9 +85,7 @@ const Filter: React.FC<FilterProps> = ({ onChange }) => {
           Filter
         </button>
       </div>
-      <Modal isOpen={modal} onClose={() => setModal(false)}>
-        <div>Testing</div>
-      </Modal>
+      <AdvancedFilter isOpen={isOpen} closeModal={closeModal} />
     </form>
   );
 };
