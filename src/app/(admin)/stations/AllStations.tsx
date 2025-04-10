@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { usePlayer } from '@/context/PlayerContext';
-import { RadioStation } from '@/app/types';
+import { FilterQuery, RadioStation } from '@/app/types';
 import { Loading, NoData } from '@/components/common/ApiComponents';
 import Filter from './Filter';
 import StationList from '@/components/stations/StationList';
@@ -16,10 +16,10 @@ export default function AllStations() {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [apiState, setApiState] = useState<string>('LOADING');
 
-  const queryRef = useRef<string>('');
+  const queryRef = useRef<FilterQuery>({ station: '', tag: '', country: '' });
 
   const fetchStations = useCallback(async (page: number) => {
-    const { current: query } = queryRef;
+    const { station, tag, country } = queryRef.current;
 
     try {
       setApiState('LOADING');
@@ -29,9 +29,9 @@ export default function AllStations() {
         offset: `${(page - 1) * STATIONS_PER_PAGE}`,
       });
 
-      if (query) params.append('query', query);
-      // if (selectedTag) params.append('tag', selectedTag);
-      // if (selectedCountry) params.append('country', selectedCountry);
+      if (station) params.append('query', station);
+      if (tag) params.append('tag', tag);
+      if (country) params.append('country', country);
 
       const response = await fetch(`/api/stations?${params}`);
       const data = await response.json();
@@ -84,15 +84,14 @@ export default function AllStations() {
     fetchStations(1);
   }, [fetchStations]);
 
-  const onFilter = (filter: string) => {
-    queryRef.current = filter;
-
+  const onFilter = (filter: FilterQuery) => {
+    queryRef.current = { ...filter };
     fetchStations(1);
   };
 
   return (
     <>
-      <Filter onChange={onFilter} />
+      <Filter onFilter={onFilter} />
 
       {apiState === 'LOADING' && <Loading />}
 

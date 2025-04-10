@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import AdvancedFilter from './AdvancedFilter';
 import { useModal } from '@/hooks/useModal';
+import { FilterQuery } from '@/app/types';
 
 interface FilterProps {
-  onChange: (filter: string) => void;
+  onFilter: (filter: FilterQuery) => void;
 }
 
 const FilterIcon = () => (
@@ -29,7 +30,7 @@ const FilterIcon = () => (
   </span>
 );
 
-const Filter: React.FC<FilterProps> = ({ onChange }) => {
+const Filter: React.FC<FilterProps> = ({ onFilter }) => {
   const [filter, setFilter] = useState<string>('');
   const { isOpen, openModal, closeModal } = useModal();
 
@@ -40,21 +41,19 @@ const Filter: React.FC<FilterProps> = ({ onChange }) => {
       if (!filter) return;
 
       setFilter('');
-      onChange(filter);
+      onFilter({ station: filter, tag: '', country: '' });
     }
   };
 
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const onSubmit = () => {
     if (!filter) return;
 
     setFilter('');
-    onChange(filter);
+    onFilter({ station: filter, tag: '', country: '' });
   };
 
   return (
-    <form className="col-span-12 md:col-span-6 xl:col-span-4" onSubmit={onSubmit}>
+    <div className="col-span-12 md:col-span-6 xl:col-span-4" onSubmit={onSubmit}>
       <div className="relative flex items-center">
         <FilterIcon />
         <input
@@ -81,12 +80,13 @@ const Filter: React.FC<FilterProps> = ({ onChange }) => {
           type="submit"
           className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 rounded-r-md px-4 py-2 text-white"
           title="Filter Stations"
+          onClick={onSubmit}
         >
           Filter
         </button>
       </div>
-      <AdvancedFilter isOpen={isOpen} closeModal={closeModal} />
-    </form>
+      <AdvancedFilter isOpen={isOpen} closeModal={closeModal} onFilter={onFilter} />
+    </div>
   );
 };
 

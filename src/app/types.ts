@@ -7,3 +7,9 @@ export interface RadioStation {
   codec?: string;
   bitrate?: number;
 }
+
+export interface FilterQuery {
+  station: string;
+  tag: string;
+  country: string;
+}
