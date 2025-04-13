@@ -50,6 +50,34 @@ That's it! Now you can open your browser and visit...
 http://localhost:3000
 ```
 
+## Deploying the App to a Home Server
+
+When choosing a distribution for your home server, I recommend Debian 12. I encountered some issues getting audio to work properly with Ubuntu Server 24, whereas Debian 12 has proven to be more stable in this regard.
+
+### Validate Audio Output
+
+To verify that audio output is working, run the following command:
+
+```
+speaker-test -D hw:0,0 -c 2 -t wav
+```
+
+If you don't hear any sound, check the mixer settings using alsamixer. Ensure that all relevant output channels are unmuted (e.g., Master, Headphones, Speaker, PCM, etc.). You can unmute a channel by selecting it and pressing the m key it should display 00 when unmuted.
+
+```
+alsamixer
+```
+
+After adjusting the settings, try the sound test again.
+
+If the steps above don’t resolve the issue… well, you might be in for a bit of a challenge. 😅
+
+Once you have the sound working, test it using VLC Media Player, as it is one of the requirements for running this application.
+
+```
+cvlc /path_to_your_audio_file
+```
+
 ## Start VLC server on system boot Linux
 
 1. Create the service file
