@@ -122,3 +122,99 @@ sudo systemctl stop vlc-server.service
 # Prevent it from starting on system boot
 sudo systemctl disable vlc-server.service
 ```
+
+## Setup NextJS on Debian server
+
+login to server
+
+```
+ssh your_user_name@ip_address
+```
+
+Install NGINX and Certbot
+
+```
+sudo apt install nginx
+```
+
+Allow Firewall Access
+
+```
+sudo ufw allow "Nginx Full"
+ufw allow OpenSSH
+ufw enable
+```
+
+Install NPM
+
+```
+sudo apt install npm
+```
+
+install nodejs
+
+```
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+exec $SHELL
+nvm install --lts
+```
+
+Install GIT
+
+```
+sudo apt install git-all
+```
+
+Install pm2
+
+```
+npm install -g pm2
+```
+
+Check pm2 is working
+
+```
+pm2 status
+```
+
+Setup SSH key on the server - not required if you clone the repo via https
+
+```
+ssh-keygen -t rsa -b 4096 -C "username@email.com"
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_rsa
+cat ~/.ssh/id_rsa.pub
+```
+
+Add public key to github repo settings > deploy key [or add to your profile settings > SSH so you can pull from all repos]
+
+Go to www root
+
+```
+cd /var/www
+sudo mkdir internet_radio
+sudo chown -R yourusername:www-data /var/www/internet_radio
+git clone https://github.com/mjakal/internet_radio.git
+```
+
+Go inside internet_radio directory
+
+```
+cd internet_radio
+```
+
+Install npm modules and build the app.
+
+```
+npm install
+# Before running the build command check if the .env file is configured correctly
+npm run build
+```
+
+Test the app before deploying
+
+```
+npm start
+```
+
+Navigate to http://your_server_ip:3000
