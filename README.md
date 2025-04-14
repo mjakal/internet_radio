@@ -218,3 +218,72 @@ npm start
 ```
 
 Navigate to http://your_server_ip:3000
+
+Create NGINX config file and edit it
+
+```
+cd /etc/nginx/sites-available
+sudo touch internet_radio
+sudo nano internet_radio
+```
+
+NGINX config file for Nextjs App
+
+```
+server {
+        listen 80;
+        server_name 192.168.0.3; #if no domain you can use server ip until then
+
+        gzip on;
+        gzip_proxied any;
+        gzip_types application/javascript application/x-javascript text/css text/javascript;
+        gzip_comp_level 5;
+        gzip_buffers 16 8k;
+        gzip_min_length 256;
+
+        location /_next/static/ {
+                alias /var/www/internet_radio/.next/static/;
+                expires 365d;
+                access_log off;
+        }
+
+        location / {
+                proxy_pass http://127.0.0.1:3000; #change ports for second app i.e. 3001,3002
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
+                proxy_cache_bypass $http_upgrade;
+        }
+}
+```
+
+Syslink the file in sites-enabled
+
+```
+sudo ln -s /etc/nginx/sites-available/internet_radio /etc/nginx/sites-enabled/internet_radio
+
+# make Sure NGINX file is good
+sudo nginx -t
+
+# remove the default config files
+cd /etc/nginx/sites-available
+sudo rm default
+cd /etc/nginx/sites-enabled
+sudo rm default
+
+# restart NGINX to reload config files
+sudo systemctl restart nginx
+
+# Go to site directory and launch it with pm2
+cd /var/www/internet_radio
+
+# launch app with pm2
+pm2 start npm --name internet_radio -- start -- --port=3000
+
+# save pm2 list
+pm2 save
+
+# pm2 restart on reboot
+pm2 startup
+```
