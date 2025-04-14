@@ -248,6 +248,10 @@ server {
         }
 
         location / {
+                proxy_connect_timeout 60s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+                send_timeout 60s;
                 proxy_pass http://127.0.0.1:3000; #change ports for second app i.e. 3001,3002
                 proxy_http_version 1.1;
                 proxy_set_header Upgrade $http_upgrade;
