@@ -10,7 +10,7 @@ import StationList from '@/components/stations/StationList';
 const STATIONS_PER_PAGE = 24;
 
 export default function AllStations() {
-  const { playStation } = usePlayer();
+  const { playStation, addFavorite } = usePlayer();
   const [stations, setStations] = useState<RadioStation[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -65,18 +65,6 @@ export default function AllStations() {
     [fetchStations],
   );
 
-  const onAddFavorite = useCallback(async (station: RadioStation) => {
-    try {
-      await fetch('/api/favorites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(station),
-      });
-    } catch (error) {
-      console.error('API request failed:', error);
-    }
-  }, []);
-
   // Reset and fetch when applied filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -105,7 +93,7 @@ export default function AllStations() {
                 stations={stations}
                 type="CREATE"
                 playStation={playStation}
-                onFavorite={onAddFavorite}
+                onFavorite={addFavorite}
               />
             </div>
           ) : (

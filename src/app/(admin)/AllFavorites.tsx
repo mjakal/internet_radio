@@ -7,7 +7,7 @@ import { RadioStation } from '@/app/types';
 import StationList from '@/components/stations/StationList';
 
 export default function AllFavorites() {
-  const { playStation } = usePlayer();
+  const { playStation, deleteFavorite } = usePlayer();
   const [stations, setStations] = useState<RadioStation[]>([]);
   const [apiState, setApiState] = useState<string>('LOADING');
 
@@ -26,23 +26,16 @@ export default function AllFavorites() {
     }
   }, []);
 
-  const onDeleteFavorite = useCallback(async (station: RadioStation) => {
-    try {
-      const response = await fetch('/api/favorites', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(station),
-      });
-
-      await response.json();
-
+  const onDeleteFavorite = useCallback(
+    async (station: RadioStation) => {
       setStations((prevState) => {
         return prevState.filter((item) => item.station_id !== station.station_id);
       });
-    } catch (error) {
-      console.error('API request failed:', error);
-    }
-  }, []);
+
+      deleteFavorite(station);
+    },
+    [deleteFavorite],
+  );
 
   // Reset and fetch when applied filters change
   useEffect(() => {

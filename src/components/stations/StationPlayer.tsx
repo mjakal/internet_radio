@@ -16,7 +16,7 @@ import ServerInfo from './ServerInfo';
 const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
 
 const StationPlayer = () => {
-  const { station, stopPlayback } = usePlayer();
+  const { station, stopPlayback, addFavorite } = usePlayer();
 
   // Early exit - stop component rendering
   if (!station) return null;
@@ -96,10 +96,7 @@ const StationPlayer = () => {
               <span />
             </div>
             <div className="ml-3 flex min-w-0 flex-col">
-              <div
-                className="w-40 truncate overflow-hidden leading-none font-medium whitespace-nowrap text-gray-800 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200"
-                onClick={() => playStation(station)}
-              >
+              <div className="w-40 truncate overflow-hidden leading-none font-medium whitespace-nowrap text-gray-800 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200">
                 {name}
               </div>
               <p className="mt-1 w-40 truncate overflow-hidden text-sm leading-none whitespace-nowrap text-gray-400 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200">
@@ -124,6 +121,7 @@ const StationPlayer = () => {
                 type="button"
                 className="flex-no-shrink mr-2 text-xs font-medium tracking-wider text-gray-500 transition duration-300 ease-in hover:text-green-300"
                 title="Add to favorites"
+                onClick={() => addFavorite(station)}
               >
                 <StarIcon className="h-6 w-6" />
               </button>

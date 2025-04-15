@@ -50,6 +50,8 @@ type PlayerContextType = {
   station: RadioStation | null;
   playStation: (station: RadioStation | null) => void;
   stopPlayback: () => void;
+  addFavorite: (station: RadioStation) => void;
+  deleteFavorite: (station: RadioStation) => void;
 };
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -108,8 +110,34 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setStation(null);
   };
 
+  const addFavorite = async (station: RadioStation) => {
+    try {
+      await fetch('/api/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(station),
+      });
+    } catch (error) {
+      console.error('API request failed:', error);
+    }
+  };
+
+  const deleteFavorite = async (station: RadioStation) => {
+    try {
+      await fetch('/api/favorites', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(station),
+      });
+    } catch (error) {
+      console.error('API request failed:', error);
+    }
+  };
+
   return (
-    <PlayerContext.Provider value={{ station, playStation, stopPlayback }}>
+    <PlayerContext.Provider
+      value={{ station, playStation, stopPlayback, addFavorite, deleteFavorite }}
+    >
       {children}
     </PlayerContext.Provider>
   );
