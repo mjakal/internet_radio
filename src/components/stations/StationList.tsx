@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
-import { SignalIcon, StarIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { PlayIcon, StarIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { RadioStation } from '@/app/types';
 
 interface StationListProps {
@@ -25,7 +25,7 @@ const StationList: React.FC<StationListProps> = ({ stations, type, playStation, 
             className="flex transform cursor-pointer flex-col rounded-2xl border-gray-200 bg-white p-4 shadow-md transition duration-500 ease-in hover:scale-105 dark:border-gray-800 dark:bg-white/[0.03]"
           >
             <div className="flex items-center justify-between">
-              <div className="mr-auto flex items-center">
+              <div className="mr-auto flex items-center" onClick={() => playStation(station)}>
                 <div className="inline-flex h-12 w-12">
                   <Image
                     src={favicon ? favicon : '/images/cards/station-fallback.jpg'}
@@ -38,10 +38,7 @@ const StationList: React.FC<StationListProps> = ({ stations, type, playStation, 
                   <span />
                 </div>
                 <div className="ml-3 flex min-w-0 flex-col">
-                  <div
-                    className="w-40 truncate overflow-hidden leading-none font-medium whitespace-nowrap text-gray-800 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200"
-                    onClick={() => playStation(station)}
-                  >
+                  <div className="w-40 truncate overflow-hidden leading-none font-medium whitespace-nowrap text-gray-800 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200">
                     {name}
                   </div>
                   <p className="mt-1 w-40 truncate overflow-hidden text-sm leading-none whitespace-nowrap text-gray-400 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200">
@@ -60,7 +57,7 @@ const StationList: React.FC<StationListProps> = ({ stations, type, playStation, 
                     title="Play Station"
                     onClick={() => playStation(station)}
                   >
-                    <SignalIcon className="h-6 w-6" />
+                    <PlayIcon className="h-6 w-6" />
                   </button>
                   <button
                     type="button"

@@ -7,6 +7,7 @@ import {
   AdjustmentsHorizontalIcon,
   StopIcon,
   TagIcon,
+  StarIcon,
 } from '@heroicons/react/24/outline';
 import { truncateString } from '@/helpers';
 import ClientInfo from './ClientInfo';
@@ -24,7 +25,8 @@ const StationPlayer = () => {
 
   return (
     <div className="sticky top-25 z-10 mb-6 flex flex-col">
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 transition-shadow hover:shadow-lg dark:border-gray-800 dark:bg-gray-900/[0.90]">
+      {/* Desktop only */}
+      <div className="hidden rounded-2xl border border-gray-200 bg-white p-4 transition-shadow hover:shadow-lg md:block dark:border-gray-800 dark:bg-gray-900/[0.90]">
         <div className="flex-none sm:flex">
           <div className="relative mb-3 h-32 w-32 sm:mb-0">
             <Image
@@ -73,6 +75,57 @@ const StationPlayer = () => {
               >
                 <StopIcon className="inline-block h-4 w-4" />
                 <span className="ms-1">Stop Playback</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Mobile only */}
+      <div className="mb-3 block flex transform cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-4 transition-shadow hover:shadow-lg md:hidden dark:border-gray-800 dark:bg-gray-900/[0.90]">
+        <div className="flex items-center justify-between">
+          <div className="mr-auto flex items-center">
+            <div className="inline-flex h-12 w-12">
+              <Image
+                src={favicon ? favicon : '/images/cards/station-fallback.jpg'}
+                width={100}
+                height={100}
+                alt={name}
+                className="relative h-12 w-12 rounded-2xl object-cover p-1"
+              />
+              <span className="absolute inline-flex h-12 w-12 rounded-2xl border-2 border-gray-500 opacity-75" />
+              <span />
+            </div>
+            <div className="ml-3 flex min-w-0 flex-col">
+              <div
+                className="w-40 truncate overflow-hidden leading-none font-medium whitespace-nowrap text-gray-800 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200"
+                onClick={() => playStation(station)}
+              >
+                {name}
+              </div>
+              <p className="mt-1 w-40 truncate overflow-hidden text-sm leading-none whitespace-nowrap text-gray-400 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200">
+                {PLAYER_TYPE === 'SERVER' ? <ServerInfo station={station} /> : <ClientInfo />}
+              </p>
+            </div>
+          </div>
+          <div className="ml-3 flex min-w-0 flex-col">
+            <span className="mb-1 text-center text-xs text-gray-400">
+              {bitrate ? bitrate + ' kbps' : '64 kbps'}
+            </span>
+            <div className="flex">
+              <button
+                type="button"
+                className="flex-no-shrink mr-2 text-xs font-medium tracking-wider text-gray-500 transition duration-300 ease-in hover:text-green-600"
+                title="Stop Playback"
+                onClick={stopPlayback}
+              >
+                <StopIcon className="h-6 w-6" />
+              </button>
+              <button
+                type="button"
+                className="flex-no-shrink mr-2 text-xs font-medium tracking-wider text-gray-500 transition duration-300 ease-in hover:text-green-300"
+                title="Add to favorites"
+              >
+                <StarIcon className="h-6 w-6" />
               </button>
             </div>
           </div>
