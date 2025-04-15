@@ -50,7 +50,7 @@ That's it! Now you can open your browser and visit...
 http://localhost:3000
 ```
 
-## Deploying the App to a Home Server
+## Deploying the app to a home server
 
 When choosing a distribution for your home server, I recommend Debian 12. I encountered some issues getting audio to work properly with Ubuntu Server 24, whereas Debian 12 has proven to be more stable in this regard.
 
@@ -123,63 +123,38 @@ sudo systemctl stop vlc-server.service
 sudo systemctl disable vlc-server.service
 ```
 
-## Setup NextJS on Debian server
-
-login to server
+## Deploy the app
 
 ```
+# login to server
 ssh your_user_name@ip_address
-```
 
-Install NGINX and Certbot
-
-```
+# Install NGINX
 sudo apt install nginx
-```
 
-Allow Firewall Access
-
-```
+# Allow Firewall Access
 sudo ufw allow "Nginx Full"
 ufw allow OpenSSH
 ufw enable
-```
 
-Install NPM
-
-```
+# Install NPM
 sudo apt install npm
-```
 
-install nodejs
-
-```
+# install nodejs
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 exec $SHELL
 nvm install --lts
-```
 
-Install GIT
-
-```
+# Install git
 sudo apt install git-all
-```
 
-Install pm2
-
-```
+# Install pm2
 npm install -g pm2
-```
 
-Check pm2 is working
-
-```
+# Check pm2 is working
 pm2 status
-```
 
-Setup SSH key on the server - not required if you clone the repo via https
-
-```
+# Setup SSH key on the server - not required if you clone the repo via https
 ssh-keygen -t rsa -b 4096 -C "username@email.com"
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_rsa
@@ -188,46 +163,32 @@ cat ~/.ssh/id_rsa.pub
 
 Add public key to github repo settings > deploy key [or add to your profile settings > SSH so you can pull from all repos]
 
-Go to www root
-
 ```
+# Go to www root
 cd /var/www
 sudo mkdir internet_radio
 sudo chown -R yourusername:www-data /var/www/internet_radio
 git clone https://github.com/mjakal/internet_radio.git
-```
 
-Go inside internet_radio directory
-
-```
+# Go inside internet_radio directory
 cd internet_radio
-```
 
-Install npm modules and build the app.
-
-```
+# Install npm packages and build the app.
 npm install
+
 # Before running the build command check if the .env file is configured correctly
 npm run build
-```
 
-Test the app before deploying
+# Test the app before deploying
+npm start # Navigate to http://your_server_ip:3000
 
-```
-npm start
-```
-
-Navigate to http://your_server_ip:3000
-
-Create NGINX config file and edit it
-
-```
+# Create NGINX config file and edit it
 cd /etc/nginx/sites-available
 sudo touch internet_radio
 sudo nano internet_radio
 ```
 
-NGINX config file for Nextjs App
+NGINX config file
 
 ```
 server {
@@ -260,14 +221,11 @@ server {
                 proxy_cache_bypass $http_upgrade;
         }
 }
-```
 
-Syslink the file in sites-enabled
-
-```
+# Syslink the file in sites-enabled
 sudo ln -s /etc/nginx/sites-available/internet_radio /etc/nginx/sites-enabled/internet_radio
 
-# make Sure NGINX file is good
+# make sure that NGINX file is configured correctly
 sudo nginx -t
 
 # remove the default config files
@@ -278,11 +236,15 @@ sudo rm default
 
 # restart NGINX to reload config files
 sudo systemctl restart nginx
+```
 
-# Go to site directory and launch it with pm2
+Deploy the app
+
+```
+# Go to app directory
 cd /var/www/internet_radio
 
-# launch app with pm2
+# Deploy the app using pm2
 pm2 start npm --name internet_radio -- start -- --port=3000
 
 # save pm2 list
