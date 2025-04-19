@@ -7,7 +7,6 @@ import {
   AdjustmentsHorizontalIcon,
   StopIcon,
   TagIcon,
-  StarIcon,
 } from '@heroicons/react/24/outline';
 import { truncateString } from '@/helpers';
 import ClientInfo from './ClientInfo';
