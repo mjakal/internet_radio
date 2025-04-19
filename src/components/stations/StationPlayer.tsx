@@ -110,12 +110,11 @@ const StationPlayer = () => {
             <div className="flex">
               <button
                 type="button"
-                className="w-full rounded-md border border-gray-900 px-2 text-xs font-medium tracking-wider text-gray-400 transition-shadow hover:shadow-lg dark:border-gray-400"
+                className="w-full text-gray-400 transition-shadow hover:shadow-lg"
                 title="Stop Playback"
                 onClick={stopPlayback}
               >
                 <StopIcon className="inline h-6 w-6" />
-                Stop
               </button>
             </div>
           </div>
