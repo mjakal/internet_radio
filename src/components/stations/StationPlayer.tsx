@@ -16,7 +16,7 @@ import ServerInfo from './ServerInfo';
 const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
 
 const StationPlayer = () => {
-  const { station, stopPlayback, addFavorite } = usePlayer();
+  const { station, stopPlayback } = usePlayer();
 
   // Early exit - stop component rendering
   if (!station) return null;
@@ -111,19 +111,12 @@ const StationPlayer = () => {
             <div className="flex">
               <button
                 type="button"
-                className="flex-no-shrink mr-2 text-xs font-medium tracking-wider text-gray-500 transition duration-300 ease-in hover:text-green-600"
+                className="w-full rounded-md border border-gray-900 px-2 text-xs font-medium tracking-wider text-gray-400 transition-shadow hover:shadow-lg dark:border-gray-400"
                 title="Stop Playback"
                 onClick={stopPlayback}
               >
-                <StopIcon className="h-6 w-6" />
-              </button>
-              <button
-                type="button"
-                className="flex-no-shrink mr-2 text-xs font-medium tracking-wider text-gray-500 transition duration-300 ease-in hover:text-green-300"
-                title="Add to favorites"
-                onClick={() => addFavorite(station)}
-              >
-                <StarIcon className="h-6 w-6" />
+                <StopIcon className="inline h-6 w-6" />
+                Stop
               </button>
             </div>
           </div>
