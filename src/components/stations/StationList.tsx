@@ -2,6 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { PlayIcon, StarIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { StarIcon as StarIconOutline } from '@heroicons/react/24/outline';
 import { RadioStation } from '@/app/types';
 
 interface StationListProps {
@@ -17,7 +18,7 @@ const StationList: React.FC<StationListProps> = ({ stations, type, playStation, 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
       {stations.map((station) => {
-        const { station_id, favicon, name, tags, bitrate } = station;
+        const { station_id, favicon, name, tags, bitrate, isFavorite } = station;
 
         return (
           <div
@@ -66,7 +67,7 @@ const StationList: React.FC<StationListProps> = ({ stations, type, playStation, 
                     onClick={() => onFavorite(station)}
                   >
                     {addFavorite ? (
-                      <StarIcon className="h-6 w-6" />
+                      isFavorite ? <StarIcon className="h-6 w-6 text-yellow-400 dark:text-purple-400" /> : <StarIconOutline className="h-6 w-6" />
                     ) : (
                       <TrashIcon className="h-6 w-6" />
                     )}

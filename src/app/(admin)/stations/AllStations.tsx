@@ -24,6 +24,10 @@ export default function AllStations() {
     try {
       setApiState('LOADING');
 
+      const favoritesResponse = await fetch('/api/favorites');
+      const favoritesJson = await favoritesResponse.json();
+      const favorites = favoritesJson.data;
+
       const params = new URLSearchParams({
         limit: `${STATIONS_PER_PAGE}`,
         offset: `${(page - 1) * STATIONS_PER_PAGE}`,
@@ -34,11 +38,18 @@ export default function AllStations() {
       if (country) params.append('country', country);
 
       const response = await fetch(`/api/stations?${params}`);
-      const data = await response.json();
+      let data = await response.json();
 
       if (data.error) {
         throw new Error(data.error);
       }
+
+      data = data.map((station: RadioStation) => {
+        const isFavorite = favorites.some(
+          (favorite: RadioStation) => favorite.station_id === station.station_id,
+        );
+        return { ...station, isFavorite };
+      });
 
       if (page === 1) {
         setStations(data);
@@ -93,7 +104,16 @@ export default function AllStations() {
                 stations={stations}
                 type="CREATE"
                 playStation={playStation}
-                onFavorite={addFavorite}
+                onFavorite={(station) => {
+                  if (!station.isFavorite) {
+                    addFavorite(station);
+                    station.isFavorite = true;
+
+                    setStations((prev) =>
+                      prev.map((s: RadioStation) => (s.station_id === station.station_id ? station : s)),
+                    );
+                  }
+                }}
               />
             </div>
           ) : (

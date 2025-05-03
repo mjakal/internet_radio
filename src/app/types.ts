@@ -6,6 +6,7 @@ export interface RadioStation {
   tags?: string;
   codec?: string;
   bitrate?: number;
+  isFavorite?: boolean;
 }
 
 export interface FilterQuery {
