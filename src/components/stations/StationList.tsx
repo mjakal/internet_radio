@@ -67,7 +67,11 @@ const StationList: React.FC<StationListProps> = ({ stations, type, playStation, 
                     onClick={() => onFavorite(station)}
                   >
                     {addFavorite ? (
-                      isFavorite ? <StarIcon className="h-6 w-6 text-yellow-400 dark:text-purple-400" /> : <StarIconOutline className="h-6 w-6" />
+                      isFavorite ? (
+                        <StarIcon className="h-6 w-6 text-yellow-400 dark:text-purple-400" />
+                      ) : (
+                        <StarIconOutline className="h-6 w-6" />
+                      )
                     ) : (
                       <TrashIcon className="h-6 w-6" />
                     )}

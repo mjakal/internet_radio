@@ -2,11 +2,7 @@
 import React from 'react';
 import { usePlayer } from '@/context/PlayerContext';
 import Image from 'next/image';
-import {
-  SpeakerWaveIcon,
-  AdjustmentsHorizontalIcon,
-  TagIcon,
-} from '@heroicons/react/24/outline';
+import { SpeakerWaveIcon, AdjustmentsHorizontalIcon, TagIcon } from '@heroicons/react/24/outline';
 import { StopIcon } from '@heroicons/react/24/solid';
 import { truncateString } from '@/helpers';
 import ClientInfo from './ClientInfo';
@@ -24,8 +20,8 @@ const StationPlayer = () => {
 
   return (
     <div className="sticky top-26 z-10 mb-6 flex flex-col">
-      <div className="absolute inset-x-0 -top-16 -bottom-0 -left-8 -right-8 -z-10 bg-white dark:bg-gray-900 shadow-lg"></div>
-      
+      <div className="absolute inset-x-0 -top-16 -right-8 -bottom-0 -left-8 -z-10 bg-white shadow-lg dark:bg-gray-900"></div>
+
       {/* Desktop only */}
       <div className="hidden bg-transparent p-4 md:block dark:bg-transparent">
         <div className="flex-none sm:flex">

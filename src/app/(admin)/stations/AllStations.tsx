@@ -110,7 +110,9 @@ export default function AllStations() {
                     station.isFavorite = true;
 
                     setStations((prev) =>
-                      prev.map((s: RadioStation) => (s.station_id === station.station_id ? station : s)),
+                      prev.map((s: RadioStation) =>
+                        s.station_id === station.station_id ? station : s,
+                      ),
                     );
                   }
                 }}
