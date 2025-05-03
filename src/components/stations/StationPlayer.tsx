@@ -5,9 +5,9 @@ import Image from 'next/image';
 import {
   SpeakerWaveIcon,
   AdjustmentsHorizontalIcon,
-  StopIcon,
   TagIcon,
 } from '@heroicons/react/24/outline';
+import { StopIcon } from '@heroicons/react/24/solid';
 import { truncateString } from '@/helpers';
 import ClientInfo from './ClientInfo';
 import ServerInfo from './ServerInfo';
@@ -23,9 +23,11 @@ const StationPlayer = () => {
   const { favicon, name, tags, codec, bitrate } = station;
 
   return (
-    <div className="sticky top-25 z-10 mb-6 flex flex-col">
+    <div className="sticky top-26 z-10 mb-6 flex flex-col">
+      <div className="absolute inset-x-0 -top-16 -bottom-0 -left-8 -right-8 -z-10 bg-white dark:bg-gray-900 shadow-lg"></div>
+      
       {/* Desktop only */}
-      <div className="hidden rounded-2xl border border-gray-200 bg-white p-4 transition-shadow hover:shadow-lg md:block dark:border-gray-800 dark:bg-gray-900/[0.90]">
+      <div className="hidden bg-transparent p-4 md:block dark:bg-transparent">
         <div className="flex-none sm:flex">
           <div className="relative mb-3 h-32 w-32 sm:mb-0">
             <Image
@@ -80,7 +82,7 @@ const StationPlayer = () => {
         </div>
       </div>
       {/* Mobile only */}
-      <div className="mb-3 block flex transform cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-4 transition-shadow hover:shadow-lg md:hidden dark:border-gray-800 dark:bg-gray-900/[0.90]">
+      <div className="mb-3 block flex transform cursor-pointer flex-col bg-transparent p-4 md:hidden dark:bg-transparent">
         <div className="flex items-center justify-between">
           <div className="mr-auto flex items-center">
             <div className="inline-flex h-12 w-12">
