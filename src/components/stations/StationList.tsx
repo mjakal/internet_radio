@@ -7,18 +7,26 @@ import { RadioStation } from '@/app/types';
 
 interface StationListProps {
   stations: RadioStation[];
+  favoriteSet?: Set<string>;
   type: string;
   playStation: (station: RadioStation) => void;
   onFavorite: (station: RadioStation) => void;
 }
 
-const StationList: React.FC<StationListProps> = ({ stations, type, playStation, onFavorite }) => {
+const StationList: React.FC<StationListProps> = ({
+  stations,
+  favoriteSet,
+  type,
+  playStation,
+  onFavorite,
+}) => {
   const addFavorite = type === 'CREATE';
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
       {stations.map((station) => {
-        const { station_id, favicon, name, tags, bitrate, isFavorite } = station;
+        const { station_id, favicon, name, tags, bitrate } = station;
+        const isFavorite = favoriteSet?.has(station_id);
 
         return (
           <div

@@ -11,6 +11,7 @@ const STATIONS_PER_PAGE = 24;
 
 export default function AllStations() {
   const { playStation, addFavorite } = usePlayer();
+  const [favoriteSet, setFavoriteSet] = useState<Set<string>>(new Set());
   const [stations, setStations] = useState<RadioStation[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -19,15 +20,10 @@ export default function AllStations() {
   const queryRef = useRef<FilterQuery>({ station: '', tag: '', country: '' });
 
   const fetchStations = useCallback(async (page: number) => {
+    setApiState('LOADING');
     const { station, tag, country } = queryRef.current;
 
     try {
-      setApiState('LOADING');
-
-      const favoritesResponse = await fetch('/api/favorites');
-      const favoritesJson = await favoritesResponse.json();
-      const favorites = favoritesJson.data;
-
       const params = new URLSearchParams({
         limit: `${STATIONS_PER_PAGE}`,
         offset: `${(page - 1) * STATIONS_PER_PAGE}`,
@@ -38,27 +34,15 @@ export default function AllStations() {
       if (country) params.append('country', country);
 
       const response = await fetch(`/api/stations?${params}`);
-      let data = await response.json();
+      const data = await response.json();
 
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      setStations((prev) => {
+        const nextState = page === 1 ? [...data] : [...prev, ...data];
 
-      data = data.map((station: RadioStation) => {
-        const isFavorite = favorites.some(
-          (favorite: RadioStation) => favorite.station_id === station.station_id,
-        );
-        return { ...station, isFavorite };
+        return nextState;
       });
-
-      if (page === 1) {
-        setStations(data);
-      } else {
-        setStations((prev) => [...prev, ...data]);
-      }
-
-      setApiState('DONE');
       setHasMore(data.length === STATIONS_PER_PAGE);
+      setApiState('DONE');
     } catch (err) {
       console.error(err);
       setApiState('ERROR');
@@ -76,7 +60,28 @@ export default function AllStations() {
     [fetchStations],
   );
 
-  // Reset and fetch when applied filters change
+  // Fetch favorites on page load
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const favoriteList: string[] = [];
+        const response = await fetch('/api/favorites');
+        const { data } = await response.json();
+
+        data.forEach(({ station_id }: RadioStation) => {
+          favoriteList.push(station_id);
+        });
+
+        setFavoriteSet(new Set([...favoriteList]));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchFavorites();
+  }, []);
+
+  // Fetch stations on filter change
   useEffect(() => {
     setCurrentPage(1);
     setStations([]);
@@ -86,6 +91,16 @@ export default function AllStations() {
   const onFilter = (filter: FilterQuery) => {
     queryRef.current = { ...filter };
     fetchStations(1);
+  };
+
+  const onAddFavorite = (station: RadioStation) => {
+    const { station_id } = station;
+
+    // Early exit station already in favorites
+    if (favoriteSet.has(station_id)) return;
+
+    setFavoriteSet((prev) => new Set([...prev, station_id]));
+    addFavorite(station);
   };
 
   return (
@@ -102,20 +117,10 @@ export default function AllStations() {
             <div className="col-span-12 space-y-6 xl:col-span-12">
               <StationList
                 stations={stations}
+                favoriteSet={favoriteSet}
                 type="CREATE"
                 playStation={playStation}
-                onFavorite={(station) => {
-                  if (!station.isFavorite) {
-                    addFavorite(station);
-                    station.isFavorite = true;
-
-                    setStations((prev) =>
-                      prev.map((s: RadioStation) =>
-                        s.station_id === station.station_id ? station : s,
-                      ),
-                    );
-                  }
-                }}
+                onFavorite={onAddFavorite}
               />
             </div>
           ) : (
