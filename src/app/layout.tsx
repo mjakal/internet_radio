@@ -11,11 +11,9 @@ const outfit = Outfit({
 export const metadata = {
   title: 'Silicon Radio',
   description: 'Internet Radio Player',
-  manifest: '/manifest.json',
   icons: {
     icon: '/ios/32.png',
     apple: '/ios/180.png',
-    shortcut: '/favicon.ico',
   },
 };
 
