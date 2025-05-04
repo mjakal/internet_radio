@@ -8,6 +8,17 @@ const outfit = Outfit({
   subsets: ['latin'],
 });
 
+export const metadata = {
+  title: 'Silicon Radio',
+  description: 'Internet Radio Player',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/ios/32.png',
+    apple: '/ios/180.png',
+    shortcut: '/favicon.ico',
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
