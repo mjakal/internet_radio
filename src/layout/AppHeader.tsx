@@ -68,7 +68,7 @@ const AppHeader: React.FC = () => {
           </button>
 
           <Link href="/" className="flex w-full justify-center lg:hidden">
-            <span className={`${orbitron.className} text-2xl text-gray-800 dark:text-gray-200`}>
+            <span className={`${orbitron.className} text-xl text-gray-800 dark:text-gray-200`}>
               Silicon Radio
             </span>
           </Link>
