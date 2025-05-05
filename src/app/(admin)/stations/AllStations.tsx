@@ -36,6 +36,9 @@ export default function AllStations() {
       const response = await fetch(`/api/stations?${params}`);
       const data = await response.json();
 
+      // Prevent app crash if stations api fails
+      if (data.error) throw new Error(data.error);
+
       setStations((prev) => {
         const nextState = page === 1 ? [...data] : [...prev, ...data];
 
