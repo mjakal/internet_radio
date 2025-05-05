@@ -1,10 +1,17 @@
 'use client';
+
+import React from 'react';
+import { Orbitron } from 'next/font/google';
 import { ThemeToggleButton } from '@/components/common/ThemeToggleButton';
 import { FullscreenToggleButton } from '@/components/common/FullscreenToggleButton';
 import { useSidebar } from '@/context/SidebarContext';
-import Image from 'next/image';
 import Link from 'next/link';
-import React from 'react';
+
+const orbitron = Orbitron({
+  subsets: ['latin'],
+  weight: ['400'],
+  display: 'swap',
+});
 
 const AppHeader: React.FC = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -61,20 +68,9 @@ const AppHeader: React.FC = () => {
           </button>
 
           <Link href="/" className="flex w-full justify-center lg:hidden">
-            <Image
-              width={154}
-              height={32}
-              className="dark:hidden"
-              src="./images/logo/logo.svg"
-              alt="Logo"
-            />
-            <Image
-              width={154}
-              height={32}
-              className="hidden dark:block"
-              src="./images/logo/logo-dark.svg"
-              alt="Logo"
-            />
+            <span className={`${orbitron.className} text-2xl text-gray-800 dark:text-gray-200`}>
+              Silicon Radio
+            </span>
           </Link>
         </div>
         <div className="flex justify-end px-0">

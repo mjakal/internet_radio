@@ -3,8 +3,15 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { Orbitron } from 'next/font/google';
 import { useSidebar } from '../context/SidebarContext';
 import { ChevronDownIcon, GridIcon, HorizontaLDots } from '../icons/index';
+
+const orbitron = Orbitron({
+  subsets: ['latin'],
+  weight: ['400'],
+  display: 'swap',
+});
 
 type NavItem = {
   name: string;
@@ -219,22 +226,9 @@ const AppSidebar: React.FC = () => {
       >
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <Image
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <Image
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
+            <span className={`${orbitron.className} text-2xl text-gray-800 dark:text-gray-200`}>
+              Silicon Radio
+            </span>
           ) : (
             <Image src="/images/logo/logo-icon.svg" alt="Logo" width={32} height={32} />
           )}
