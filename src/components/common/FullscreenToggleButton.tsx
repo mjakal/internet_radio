@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/24/solid';
+import React from 'react';
+import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid';
 
 // Extend types for prefixed fullscreen methods
 interface FullscreenElement extends HTMLElement {
@@ -18,8 +18,6 @@ interface FullscreenDocument extends Document {
 }
 
 export const FullscreenToggleButton: React.FC = () => {
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-
   const toggleFullscreen = () => {
     const doc = document as FullscreenDocument;
     const docEl = document.documentElement as FullscreenElement;
@@ -37,8 +35,6 @@ export const FullscreenToggleButton: React.FC = () => {
         doc.webkitExitFullscreen(); // Safari
       }
     }
-
-    setIsFullscreen((prevState) => !prevState);
   };
 
   return (
@@ -47,11 +43,7 @@ export const FullscreenToggleButton: React.FC = () => {
       title="Toggle Full Screen"
       onClick={toggleFullscreen}
     >
-      {isFullscreen ? (
-        <ArrowsPointingInIcon className="h-5 w-5" />
-      ) : (
-        <ArrowsPointingOutIcon className="h-5 w-5" />
-      )}
+      <ArrowsPointingOutIcon className="h-5 w-5" />
     </button>
   );
 };
