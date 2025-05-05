@@ -3,7 +3,7 @@ import AllStations from './AllStations';
 import React from 'react';
 
 export const metadata: Metadata = {
-  title: 'Radio Player',
+  title: 'Silicon Radio',
   description: 'Internet radio player',
 };
 

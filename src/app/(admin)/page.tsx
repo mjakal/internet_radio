@@ -3,7 +3,7 @@ import AllFavorites from './AllFavorites';
 import React from 'react';
 
 export const metadata: Metadata = {
-  title: 'Radio Player',
+  title: 'Silicon Radio',
   description: 'Internet radio player',
 };
 
