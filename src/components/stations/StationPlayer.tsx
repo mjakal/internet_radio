@@ -19,9 +19,7 @@ const StationPlayer = () => {
   const { favicon, name, tags, codec, bitrate } = station;
 
   return (
-    <div className="sticky top-26 z-10 mb-6 flex flex-col">
-      <div className="absolute inset-x-0 -top-16 -right-8 -bottom-0 -left-8 -z-10 bg-white shadow-lg dark:bg-gray-900"></div>
-
+    <div className="sticky top-16 z-10 flex flex-col bg-white shadow-lg dark:bg-gray-900">
       {/* Desktop only */}
       <div className="hidden bg-transparent p-4 md:block dark:bg-transparent">
         <div className="flex-none sm:flex">

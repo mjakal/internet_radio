@@ -28,12 +28,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Header */}
         <AppHeader />
         {/* Page Content */}
-        <div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
-          <PlayerProvider>
-            <StationPlayer />
-            {children}
-          </PlayerProvider>
-        </div>
+        <PlayerProvider>
+          <StationPlayer />
+          <div className="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">{children}</div>
+        </PlayerProvider>
       </div>
     </div>
   );
