@@ -24,9 +24,10 @@ export default function AllStations() {
     const { station, tag, country } = queryRef.current;
 
     try {
+      const dataOffset = (page - 1) * STATIONS_PER_PAGE;
       const params = new URLSearchParams({
         limit: `${STATIONS_PER_PAGE}`,
-        offset: `${(page - 1) * STATIONS_PER_PAGE}`,
+        offset: `${dataOffset}`,
       });
 
       if (station) params.append('query', station);
@@ -34,17 +35,37 @@ export default function AllStations() {
       if (country) params.append('country', country);
 
       const response = await fetch(`/api/stations?${params}`);
-      const data = await response.json();
+      const stationsData = await response.json();
 
       // Prevent app crash if stations api fails
-      if (data.error) throw new Error(data.error);
+      if (stationsData.error) throw new Error(stationsData.error);
 
-      setStations((prev) => {
-        const nextState = page === 1 ? [...data] : [...prev, ...data];
+      setStations((prevState) => {
+        if (page === 1) return [...stationsData];
+
+        // Prevent adding duplicate stations
+        const nextState: RadioStation[] = [];
+        const stationIDSet: Set<string> = new Set([]);
+
+        prevState.forEach((item) => {
+          const { station_id } = item;
+
+          stationIDSet.add(station_id);
+          nextState.push(item);
+        });
+
+        stationsData.forEach((item: RadioStation) => {
+          const { station_id } = item;
+
+          if (stationIDSet.has(station_id)) return;
+
+          nextState.push(item);
+        });
 
         return nextState;
       });
-      setHasMore(data.length === STATIONS_PER_PAGE);
+
+      setHasMore(stationsData.length === STATIONS_PER_PAGE);
       setApiState('DONE');
     } catch (err) {
       console.error(err);
@@ -84,7 +105,7 @@ export default function AllStations() {
     fetchFavorites();
   }, []);
 
-  // Fetch stations on filter change
+  // Fetch stations on page load
   useEffect(() => {
     setCurrentPage(1);
     setStations([]);

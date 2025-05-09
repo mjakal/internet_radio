@@ -16,9 +16,10 @@ const ServerInfo: React.FC<ServerInfoProps> = ({ station }) => {
       try {
         const response = await fetch('/api/player?type=playlist');
         const { nowPlaying } = await response.json();
+        const decodedNovPlaying = decodeURIComponent(nowPlaying);
 
         // No station info - early exit and clear interval
-        if (!nowPlaying) {
+        if (!decodedNovPlaying) {
           setPlaylist('No info...');
 
           return clearInterval(interval);
@@ -26,9 +27,9 @@ const ServerInfo: React.FC<ServerInfoProps> = ({ station }) => {
 
         setPlaylist((prevPlaylist) => {
           // Avoid setting state if the values are equal
-          if (prevPlaylist === nowPlaying) return prevPlaylist;
+          if (prevPlaylist === decodedNovPlaying) return prevPlaylist;
 
-          return nowPlaying;
+          return decodedNovPlaying;
         });
       } catch (error) {
         console.error('API request failed:', error);
