@@ -5,10 +5,7 @@ import Image from 'next/image';
 import { SpeakerWaveIcon, AdjustmentsHorizontalIcon, TagIcon } from '@heroicons/react/24/outline';
 import { StopIcon } from '@heroicons/react/24/solid';
 import { truncateString } from '@/helpers';
-import ClientInfo from './ClientInfo';
-import ServerInfo from './ServerInfo';
-
-const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
+import StreamInfo from './StreamInfo';
 
 const StationPlayer = () => {
   const { station, stopPlayback } = usePlayer();
@@ -47,7 +44,7 @@ const StationPlayer = () => {
                   </div>
                   <div className="my-1 flex-auto text-gray-400 dark:text-gray-200">
                     <span className="mr-3">
-                      {PLAYER_TYPE === 'SERVER' ? <ServerInfo station={station} /> : <ClientInfo />}
+                      <StreamInfo station={station} />
                     </span>
                   </div>
                 </div>
@@ -95,7 +92,7 @@ const StationPlayer = () => {
                 {name}
               </div>
               <p className="mt-1 w-40 truncate overflow-hidden text-sm leading-none whitespace-nowrap text-gray-400 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200">
-                {PLAYER_TYPE === 'SERVER' ? <ServerInfo station={station} /> : <ClientInfo />}
+                <StreamInfo station={station} />
               </p>
             </div>
           </div>
