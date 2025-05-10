@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import '../../app/animations.css';
 
 interface MarqueeTextProps {
   text: string;
