@@ -6,6 +6,7 @@ import { SpeakerWaveIcon, AdjustmentsHorizontalIcon, TagIcon } from '@heroicons/
 import { StopIcon } from '@heroicons/react/24/solid';
 import { truncateString } from '@/helpers';
 import StreamInfo from './StreamInfo';
+import MarqueeText from '../common/MarqueeText';
 
 const StationPlayer = () => {
   const { station, stopPlayback } = usePlayer();
@@ -34,7 +35,7 @@ const StationPlayer = () => {
               <div className="flex items-center">
                 <div className="flex flex-col">
                   <div className="w-full flex-none text-lg leading-none font-bold text-gray-800 dark:text-gray-200">
-                    {truncateString(name, 50)}
+                    <MarqueeText text={name} />
                   </div>
                   <div className="my-1 flex-auto text-gray-400 dark:text-gray-200">
                     <span className="mr-3 overflow-hidden whitespace-nowrap">
@@ -89,7 +90,7 @@ const StationPlayer = () => {
             </div>
             <div className="ml-3 flex min-w-0 flex-col">
               <div className="w-40 truncate overflow-hidden leading-none font-medium whitespace-nowrap text-gray-800 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200">
-                {name}
+                <MarqueeText text={name} />
               </div>
               <p className="mt-1 w-40 truncate overflow-hidden text-sm leading-none whitespace-nowrap text-gray-400 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200">
                 <StreamInfo station={station} />

@@ -1,0 +1,15 @@
+.animation-marquee {
+  animation: scroll 16s linear infinite;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(0); /* Stay at start position for 15% of animation time */
+  }
+  100% {
+    transform: translateX(calc(-100% - 1rem));
+  }
+}

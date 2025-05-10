@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { RadioStation } from '@/app/types';
 import { PlayCircleIcon } from '@heroicons/react/24/solid';
+import MarqueeText from '../common/MarqueeText';
 
 interface StreamInfoProps {
   station: RadioStation;
@@ -48,9 +49,9 @@ const StreamInfo: React.FC<StreamInfoProps> = ({ station }) => {
   }, [station]);
 
   return (
-    <span>
+    <span className="flex">
       <PlayCircleIcon className="mr-1 inline h-4 w-4" />
-      {playlist || 'Hang tight...'}
+      <MarqueeText text={playlist || 'Hang tight...'} />
     </span>
   );
 };
