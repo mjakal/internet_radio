@@ -49,7 +49,7 @@ const StreamInfo: React.FC<StreamInfoProps> = ({ station }) => {
   }, [station]);
 
   return (
-    <span className="flex">
+    <span className="flex items-center">
       <PlayCircleIcon className="mr-1 inline h-4 w-4" />
       <MarqueeText text={playlist || 'Hang tight...'} />
     </span>
