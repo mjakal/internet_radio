@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePlayer } from '@/context/PlayerContext';
 import Image from 'next/image';
 import { SpeakerWaveIcon, AdjustmentsHorizontalIcon, TagIcon } from '@heroicons/react/24/outline';
@@ -8,8 +8,52 @@ import { truncateString } from '@/helpers';
 import StreamInfo from './StreamInfo';
 import MarqueeText from '../common/MarqueeText';
 
+const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
+
 const StationPlayer = () => {
   const { station, stopPlayback } = usePlayer();
+  const [info, setInfo] = useState<string>('');
+
+  useEffect(() => {
+    // Early exit - station not playing
+    if (!station) return;
+
+    const { url } = station;
+    const encodedUrl = encodeURIComponent(url);
+    const endpointURL =
+      PLAYER_TYPE === 'SERVER' ? '/api/player?type=playlist' : `/api/info?stream=${encodedUrl}`;
+
+    setInfo(''); // reset to initial state
+
+    const getStreamInfo = async () => {
+      try {
+        const response = await fetch(endpointURL);
+        const { nowPlaying } = await response.json();
+        const decodedNovPlaying = decodeURIComponent(nowPlaying);
+
+        // No station info - early exit and clear interval
+        if (!decodedNovPlaying || decodedNovPlaying === 'undefined') {
+          setInfo('No info...');
+
+          return clearInterval(interval);
+        }
+
+        setInfo((prevInfo) => {
+          // Avoid setting state if the values are equal
+          if (prevInfo === decodedNovPlaying) return prevInfo;
+
+          return decodedNovPlaying;
+        });
+      } catch (error) {
+        console.error('API request failed:', error);
+        setInfo('No info...');
+      }
+    };
+
+    const interval = setInterval(getStreamInfo, 5000); // every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [station]);
 
   // Early exit - stop component rendering
   if (!station) return null;
@@ -45,7 +89,7 @@ const StationPlayer = () => {
                   </div>
                   <div className="my-1 flex-auto text-gray-400 dark:text-gray-200">
                     <span className="mr-3">
-                      <StreamInfo station={station} />
+                      <StreamInfo info={info} />
                     </span>
                   </div>
                 </div>
@@ -93,7 +137,7 @@ const StationPlayer = () => {
                 <MarqueeText text={name} />
               </div>
               <p className="mt-1 w-40 truncate overflow-hidden text-sm leading-none whitespace-nowrap text-gray-400 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200">
-                <StreamInfo station={station} />
+                <StreamInfo info={info} />
               </p>
             </div>
           </div>
