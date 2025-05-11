@@ -18,10 +18,14 @@ export async function getStreamInfo(streamUrl: string): Promise<string> {
           resolve(title);
         });
 
-        setTimeout(() => {
+        const abortRequest = () => {
           res.req.abort();
-          reject(new Error('No metadata received within 500 ms.'));
-        }, 500);
+          // To display or not to display
+          // reject(new Error('No metadata received within 500 ms.'));
+          reject();
+        };
+
+        setTimeout(abortRequest, 500);
       })
       .on('error', (err: Error) => reject(err));
   });
