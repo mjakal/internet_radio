@@ -46,8 +46,6 @@ const Filter: React.FC<FilterProps> = ({ onFilter }) => {
   };
 
   const onSubmit = () => {
-    if (!filter) return;
-
     setFilter('');
     onFilter({ station: filter, tag: '', country: '' });
   };

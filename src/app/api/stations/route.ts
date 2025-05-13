@@ -1,8 +1,23 @@
+// Stations api docs
+// https://api.radio-browser.info/
+
 import { NextResponse } from 'next/server';
 import dns from 'dns';
 import { promisify } from 'util';
 
-const resolveSrv = promisify(dns.resolveSrv);
+// Refresh server dns list every hour
+const REFRESH_INTERVAL: number = 3600000;
+const RETRY_LIMIT: number = 3;
+const FALLBACK_SERVERS: string[] = [
+  'de1.api.radio-browser.info',
+  'nl1.api.radio-browser.info',
+  'at1.api.radio-browser.info',
+];
+const CACHED_SERVERS: { servers: string[]; lastUpdate: number; retryFetch: number } = {
+  servers: [],
+  lastUpdate: 0,
+  retryFetch: 0,
+};
 
 interface RadioBrowserStation {
   stationuuid: string;
@@ -15,85 +30,82 @@ interface RadioBrowserStation {
   bitrate?: number;
 }
 
-// Cache the server list for 1 hour
-let cachedServers: string[] = [];
-let lastServerFetch: number = 0;
+const resolveSrv = promisify(dns.resolveSrv);
 
 async function getRadioBrowserServers(): Promise<string[]> {
-  const ONE_HOUR = 3600000;
+  const { servers, lastUpdate } = CACHED_SERVERS;
 
   // Return cached servers if available and not expired
-  if (cachedServers.length > 0 && Date.now() - lastServerFetch < ONE_HOUR) {
-    return cachedServers;
+  if (servers.length > 0 && Date.now() - lastUpdate < REFRESH_INTERVAL) {
+    return servers;
   }
 
   try {
     // Get list of radio browser servers using DNS SRV lookup
-    const servers = await resolveSrv('_api._tcp.radio-browser.info');
-    cachedServers = servers.map((server) => server.name);
-    lastServerFetch = Date.now();
-    return cachedServers;
+    const serverList = await resolveSrv('_api._tcp.radio-browser.info');
+
+    CACHED_SERVERS['servers'] = serverList.map((server) => server.name);
+    CACHED_SERVERS['lastUpdate'] = Date.now();
+
+    return CACHED_SERVERS['servers'];
   } catch (error) {
     console.error('Failed to fetch radio browser servers:', error);
+
     // Fallback servers if DNS lookup fails
-    return [
-      'de1.api.radio-browser.info',
-      'nl1.api.radio-browser.info',
-      'at1.api.radio-browser.info',
-    ];
+    return FALLBACK_SERVERS;
   }
 }
 
-async function fetchRadioBrowserStations(searchParams?: {
-  query?: string;
-  tag?: string;
-  country?: string;
-  limit?: number;
-  offset?: number;
-}) {
+async function fetchRadioBrowserStations(
+  query: string,
+  tag: string,
+  country: string,
+  limit: number,
+  offset: number,
+) {
   try {
     const servers = await getRadioBrowserServers();
     const server = servers[Math.floor(Math.random() * servers.length)];
 
-    // Normalize country name if provided
-    let normalizedCountry = searchParams?.country;
-    if (normalizedCountry) {
-      normalizedCountry = normalizedCountry
-        .trim()
-        .toLowerCase()
-        .replace(/^switzerland$/i, 'Switzerland')
-        .replace(/^swiss$/i, 'Switzerland');
-    }
-
     let endpoint = 'stations';
-    const params = new URLSearchParams({
-      limit: (searchParams?.limit || '100').toString(),
-      offset: (searchParams?.offset || '0').toString(),
-      hidebroken: 'true',
-      order: 'clickcount',
-      reverse: 'true',
-    });
 
-    if (normalizedCountry) {
-      endpoint = 'stations/bycountry/' + encodeURIComponent(normalizedCountry);
-    } else if (searchParams?.query) {
-      endpoint = 'stations/byname/' + encodeURIComponent(searchParams.query);
-    } else if (searchParams?.tag) {
-      endpoint = 'stations/bytag/' + encodeURIComponent(searchParams.tag);
+    if (country) {
+      endpoint += `/bycountry/${encodeURIComponent(country)}`;
+    } else if (query) {
+      endpoint += `/byname/${encodeURIComponent(query)}`;
+    } else if (tag) {
+      endpoint += `/bytag/${encodeURIComponent(tag)}`;
     }
 
-    const response = await fetch(`https://${server}/json/${endpoint}?${params}`, {
-      headers: {
-        'User-Agent': 'InternetRadioApp/1.0',
-        'Content-Type': 'application/json',
-      },
+    const params = new URLSearchParams({
+      limit: (limit || 100).toString(),
+      offset: (offset || 0).toString(),
+      hidebroken: 'true',
+      // order: 'clickcount',
+      // reverse: 'true',
     });
+    const headers = {
+      'User-Agent': 'InternetRadioApp/1.0',
+      'Content-Type': 'application/json',
+    };
+    const requestURL = `https://${server}/json/${endpoint}?${params}`;
+    const response = await fetch(requestURL, { headers: headers });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const { retryFetch } = CACHED_SERVERS;
+
+      if (retryFetch >= RETRY_LIMIT) throw new Error(`HTTP error! status: ${response.status}`);
+
+      CACHED_SERVERS['retryFetch'] = retryFetch + 1;
+
+      // Retry fetch - recursive function call
+      return fetchRadioBrowserStations(query, tag, country, limit, offset);
     }
 
     const data = await response.json();
+
+    CACHED_SERVERS['retryFetch'] = 0;
+
     return data.map(
       ({
         stationuuid,
@@ -117,7 +129,10 @@ async function fetchRadioBrowserStations(searchParams?: {
       },
     );
   } catch (error) {
+    CACHED_SERVERS['retryFetch'] = 0;
+
     console.error('Error fetching radio stations:', error);
+
     throw error;
   }
 }
@@ -125,19 +140,13 @@ async function fetchRadioBrowserStations(searchParams?: {
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get('query') || undefined;
-    const tag = searchParams.get('tag') || undefined;
-    const country = searchParams.get('country') || undefined;
+    const query = searchParams.get('query') || '';
+    const tag = searchParams.get('tag') || '';
+    const country = searchParams.get('country') || '';
     const limit = parseInt(searchParams.get('limit') || '100');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    const stations = await fetchRadioBrowserStations({
-      query,
-      tag,
-      country,
-      limit,
-      offset,
-    });
+    const stations = await fetchRadioBrowserStations(query, tag, country, limit, offset);
 
     return NextResponse.json(stations);
   } catch (error) {
