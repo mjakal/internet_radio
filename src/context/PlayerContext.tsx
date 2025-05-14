@@ -48,6 +48,7 @@ const serverPlayback = async (station: RadioStation | null) => {
 
 type PlayerContextType = {
   station: RadioStation | null;
+  favorites: RadioStation[];
   playStation: (station: RadioStation | null) => void;
   stopPlayback: () => void;
   addFavorite: (station: RadioStation) => void;
@@ -57,8 +58,25 @@ type PlayerContextType = {
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [favorites, setFavorites] = useState<RadioStation[]>([]);
   const [station, setStation] = useState<RadioStation | null>(null);
   const playerRef = useRef<Howl | null>(null);
+
+  useEffect(() => {
+    // Initialize Favorites
+    const getFavorites = async () => {
+      try {
+        const response = await fetch('/api/favorites');
+        const { data } = await response.json();
+
+        setFavorites(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    getFavorites();
+  }, []);
 
   useEffect(() => {
     // Initialize Player
@@ -117,6 +135,8 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(station),
       });
+
+      setFavorites((prevState) => [...prevState, { ...station }]);
     } catch (error) {
       console.error('API request failed:', error);
     }
@@ -129,6 +149,12 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(station),
       });
+
+      setFavorites((prevState) => {
+        const { station_id } = station;
+
+        return prevState.filter((item) => item.station_id !== station_id);
+      });
     } catch (error) {
       console.error('API request failed:', error);
     }
@@ -136,7 +162,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   return (
     <PlayerContext.Provider
-      value={{ station, playStation, stopPlayback, addFavorite, deleteFavorite }}
+      value={{ station, favorites, playStation, stopPlayback, addFavorite, deleteFavorite }}
     >
       {children}
     </PlayerContext.Provider>

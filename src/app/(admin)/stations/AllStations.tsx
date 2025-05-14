@@ -10,7 +10,7 @@ import StationList from '@/components/stations/StationList';
 const STATIONS_PER_PAGE = 24;
 
 export default function AllStations() {
-  const { playStation, addFavorite } = usePlayer();
+  const { favorites, playStation, addFavorite } = usePlayer();
   const [favoriteSet, setFavoriteSet] = useState<Set<string>>(new Set());
   const [stations, setStations] = useState<RadioStation[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -84,27 +84,6 @@ export default function AllStations() {
     [fetchStations],
   );
 
-  // Fetch favorites on page load
-  useEffect(() => {
-    const fetchFavorites = async () => {
-      try {
-        const favoriteList: string[] = [];
-        const response = await fetch('/api/favorites');
-        const { data } = await response.json();
-
-        data.forEach(({ station_id }: RadioStation) => {
-          favoriteList.push(station_id);
-        });
-
-        setFavoriteSet(new Set([...favoriteList]));
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchFavorites();
-  }, []);
-
   // Fetch stations on page load
   useEffect(() => {
     setCurrentPage(1);
@@ -112,19 +91,16 @@ export default function AllStations() {
     fetchStations(1);
   }, [fetchStations]);
 
+  // Track favorites changes
+  useEffect(() => {
+    const nextFavorites = favorites.map(({ station_id }) => station_id);
+
+    setFavoriteSet(new Set(nextFavorites));
+  }, [favorites]);
+
   const onFilter = (filter: FilterQuery) => {
     queryRef.current = { ...filter };
     fetchStations(1);
-  };
-
-  const onAddFavorite = (station: RadioStation) => {
-    const { station_id } = station;
-
-    // Early exit station already in favorites
-    if (favoriteSet.has(station_id)) return;
-
-    setFavoriteSet((prev) => new Set([...prev, station_id]));
-    addFavorite(station);
   };
 
   return (
@@ -144,7 +120,7 @@ export default function AllStations() {
                 favoriteSet={favoriteSet}
                 type="CREATE"
                 playStation={playStation}
-                onFavorite={onAddFavorite}
+                onFavorite={addFavorite}
               />
             </div>
           ) : (
