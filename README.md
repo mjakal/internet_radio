@@ -30,6 +30,12 @@ NEXT_VLC_USERNAME= # leave it blank - vlc docs
 NEXT_VLC_PASSWORD=mySecretPassword # you should probably change it :)
 ```
 
+### App Settings
+
+- SERVER: Server-side playback using a VLC server. Favorites are stored in a SQLite database.
+- CLIENT: Client-side playback with favorites stored in a SQLite database.
+- STANDALONE: Client-side playback with favorites stored in local storage. Suitable for deployment on a public server.
+
 Once you have configured the .env file, run the commands below.
 
 ```
