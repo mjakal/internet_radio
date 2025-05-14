@@ -64,7 +64,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     // Initialize Favorites
-    const getFavorites = async () => {
+    const getFavoritesDB = async () => {
       try {
         const response = await fetch('/api/favorites');
         const { data } = await response.json();
@@ -75,7 +75,18 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
     };
 
-    getFavorites();
+    const getFavoritesLocalStorage = () => {
+      const storedFavorites: string | null = localStorage.getItem('favorites');
+      const favorites: RadioStation[] = JSON.parse(storedFavorites) || [];
+
+      setFavorites(favorites);
+    };
+
+    if (PLAYER_TYPE === 'STANDALONE') {
+      getFavoritesLocalStorage();
+    } else {
+      getFavoritesDB();
+    }
   }, []);
 
   useEffect(() => {
@@ -92,7 +103,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     // Early exit - client side playback
-    if (PLAYER_TYPE === 'CLIENT') return;
+    if (PLAYER_TYPE !== 'SERVER') return;
 
     checkPlaybackStatus();
   }, []);
@@ -130,13 +141,23 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const addFavorite = async (station: RadioStation) => {
     try {
-      await fetch('/api/favorites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(station),
-      });
+      const isStandalone = PLAYER_TYPE === 'STANDALONE';
 
-      setFavorites((prevState) => [...prevState, { ...station }]);
+      if (!isStandalone) {
+        await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(station),
+        });
+      }
+
+      setFavorites((prevState) => {
+        const nextState = [...prevState, { ...station }];
+
+        if (isStandalone) localStorage.setItem('favorites', JSON.stringify(nextState));
+
+        return nextState;
+      });
     } catch (error) {
       console.error('API request failed:', error);
     }
@@ -144,16 +165,23 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const deleteFavorite = async (station: RadioStation) => {
     try {
-      await fetch('/api/favorites', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(station),
-      });
+      const isStandalone = PLAYER_TYPE === 'STANDALONE';
+
+      if (!isStandalone) {
+        await fetch('/api/favorites', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(station),
+        });
+      }
 
       setFavorites((prevState) => {
         const { station_id } = station;
+        const nextState = prevState.filter((item) => item.station_id !== station_id);
 
-        return prevState.filter((item) => item.station_id !== station_id);
+        if (isStandalone) localStorage.setItem('favorites', JSON.stringify(nextState));
+
+        return nextState;
       });
     } catch (error) {
       console.error('API request failed:', error);

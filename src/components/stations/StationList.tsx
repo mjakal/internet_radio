@@ -27,6 +27,7 @@ const StationList: React.FC<StationListProps> = ({
       {stations.map((station) => {
         const { station_id, favicon, name, tags, bitrate } = station;
         const isFavorite = favoriteSet?.has(station_id);
+        const isDisabled = addFavorite && isFavorite;
 
         return (
           <div
@@ -73,6 +74,7 @@ const StationList: React.FC<StationListProps> = ({
                     className="flex-no-shrink mr-2 text-xs font-medium tracking-wider text-gray-500 transition duration-300 ease-in hover:text-green-300"
                     title={addFavorite ? 'Add to favorites' : 'Remove from favorites'}
                     onClick={() => onFavorite(station)}
+                    disabled={isDisabled}
                   >
                     {addFavorite ? (
                       isFavorite ? (

@@ -24,7 +24,7 @@ After successfully installing the dependencies, clone the repository from GitHub
 Create a .env file and add all the required keys.
 
 ```
-NEXT_PUBLIC_PLAYER=SERVER # CLIENT || SERVER
+NEXT_PUBLIC_PLAYER=SERVER # CLIENT || SERVER || STANDALONE
 NEXT_VLC_BASE_URL=http://127.0.0.1:9090/requests/
 NEXT_VLC_USERNAME= # leave it blank - vlc docs
 NEXT_VLC_PASSWORD=mySecretPassword # you should probably change it :)
