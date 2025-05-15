@@ -76,8 +76,8 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     const getFavoritesLocalStorage = () => {
-      const storedFavorites: string = localStorage.getItem('favorites') || '';
-      const favorites: RadioStation[] = JSON.parse(storedFavorites) || [];
+      const storedFavorites = localStorage.getItem('favorites');
+      const favorites: RadioStation[] = storedFavorites ? JSON.parse(storedFavorites) : [];
 
       setFavorites(favorites);
     };
