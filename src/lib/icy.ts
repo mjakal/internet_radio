@@ -25,7 +25,7 @@ export async function getStreamInfo(streamUrl: string): Promise<string> {
           reject();
         };
 
-        setTimeout(abortRequest, 500);
+        setTimeout(abortRequest, 1000);
       })
       .on('error', (err: Error) => reject(err));
   });
