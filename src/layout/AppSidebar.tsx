@@ -1,11 +1,11 @@
 'use client';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Orbitron } from 'next/font/google';
 import { useSidebar } from '../context/SidebarContext';
-import { ChevronDownIcon, GridIcon, HorizontaLDots } from '../icons/index';
+import { ChevronDownIcon, HorizontaLDots } from '../icons/index';
+import { PlayIcon, StarIcon, RadioIcon } from '@heroicons/react/24/solid';
 
 const orbitron = Orbitron({
   subsets: ['latin'],
@@ -22,12 +22,12 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
-    icon: <GridIcon />,
+    icon: <StarIcon className="h-6 w-6" />,
     name: 'Favorites',
     path: '/',
   },
   {
-    icon: <GridIcon />,
+    icon: <PlayIcon className="h-6 w-6" />,
     name: 'Stations',
     path: '/stations',
   },
@@ -230,7 +230,7 @@ const AppSidebar: React.FC = () => {
               Silicon Radio
             </span>
           ) : (
-            <Image src="/images/logo/logo-icon.svg" alt="Logo" width={32} height={32} />
+            <RadioIcon className="h-8 w-8 text-gray-400" />
           )}
         </Link>
       </div>
