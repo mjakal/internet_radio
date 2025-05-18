@@ -67,22 +67,17 @@ async function fetchRadioBrowserStations(
     const servers = await getRadioBrowserServers();
     const server = servers[Math.floor(Math.random() * servers.length)];
 
-    let endpoint = 'stations';
-
-    if (country) {
-      endpoint += `/bycountry/${encodeURIComponent(country)}`;
-    } else if (query) {
-      endpoint += `/byname/${encodeURIComponent(query)}`;
-    } else if (tag) {
-      endpoint += `/bytag/${encodeURIComponent(tag)}`;
-    }
+    const endpoint = 'stations/search';
 
     const params = new URLSearchParams({
-      limit: (limit || 100).toString(),
+      name: query,
+      tag: tag,
+      country: country,
+      limit: (limit || 24).toString(),
       offset: (offset || 0).toString(),
       hidebroken: 'true',
-      // order: 'clickcount',
-      // reverse: 'true',
+      order: 'clickcount',
+      reverse: 'true',
     });
     const headers = {
       'User-Agent': 'InternetRadioApp/1.0',

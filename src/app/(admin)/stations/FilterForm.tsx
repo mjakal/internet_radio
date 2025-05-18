@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Button from '@/components/ui/button/Button';
 import Label from '@/components/form/Label';
 import Input from '@/components/form/input/InputField';
+import InputSelect from '@/components/form/input/InputSelect';
+import options from './countries.json';
 import { FilterQuery } from '@/app/types';
 
 interface FilterFormProps {
@@ -63,13 +65,18 @@ const FilterForm: React.FC<FilterFormProps> = ({ closeModal, onFilter }) => {
 
         <div className="col-span-1 sm:col-span-2">
           <Label>Country</Label>
-          <Input
-            type="text"
-            name="country"
-            value={query.country}
-            max="30"
-            onChange={onChange}
-            placeholder="Station Country"
+          <InputSelect
+            options={options}
+            placeholder="Select a Country"
+            onChange={(selected) => {
+              setQuery((prevState) => {
+                if (!selected) return { ...prevState, country: '' };
+
+                const { label } = selected;
+
+                return { ...prevState, country: label };
+              });
+            }}
           />
         </div>
       </div>
