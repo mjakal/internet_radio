@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation';
 import { Orbitron } from 'next/font/google';
 import { useSidebar } from '../context/SidebarContext';
 import { ChevronDownIcon, HorizontaLDots } from '../icons/index';
-import { PlayIcon, StarIcon, RadioIcon } from '@heroicons/react/24/solid';
+import { PlayIcon, StarIcon } from '@heroicons/react/24/solid';
+import Image from 'next/image';
 
 const orbitron = Orbitron({
   subsets: ['latin'],
@@ -232,7 +233,7 @@ const AppSidebar: React.FC = () => {
               Silicon Radio
             </span>
           ) : (
-            <RadioIcon className="h-8 w-8 text-gray-400" />
+            <Image src="/images/logo.png" alt="Logo" width={64} height={64} />
           )}
         </Link>
       </div>
