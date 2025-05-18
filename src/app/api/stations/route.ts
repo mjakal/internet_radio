@@ -70,8 +70,8 @@ async function fetchRadioBrowserStations(
     const endpoint = 'stations/search';
 
     const params = new URLSearchParams({
-      name: query,
-      tag: tag,
+      name: query.toLowerCase(),
+      tag: tag.toLowerCase(),
       country: country,
       limit: (limit || 24).toString(),
       offset: (offset || 0).toString(),
