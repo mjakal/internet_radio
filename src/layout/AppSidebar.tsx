@@ -34,7 +34,7 @@ const navItems: NavItem[] = [
 ];
 
 const AppSidebar: React.FC = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const { isExpanded, isMobileOpen, isHovered, setIsHovered, closeMobileSidebar } = useSidebar();
   const pathname = usePathname();
 
   const renderMenuItems = (navItems: NavItem[], menuType: 'main' | 'others') => (
@@ -81,6 +81,7 @@ const AppSidebar: React.FC = () => {
                 className={`menu-item group ${
                   isActive(nav.path) ? 'menu-item-active' : 'menu-item-inactive'
                 }`}
+                onClick={() => isMobileOpen && closeMobileSidebar()}
               >
                 <span
                   className={`${
@@ -118,6 +119,7 @@ const AppSidebar: React.FC = () => {
                           ? 'menu-dropdown-item-active'
                           : 'menu-dropdown-item-inactive'
                       }`}
+                      onClick={() => isMobileOpen && closeMobileSidebar()}
                     >
                       {subItem.name}
                       <span className="ml-auto flex items-center gap-1">
