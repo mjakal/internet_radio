@@ -29,10 +29,9 @@ const StationPlayer = () => {
       try {
         const response = await fetch(endpointURL);
         const { nowPlaying } = await response.json();
-        const decodedNovPlaying = decodeURIComponent(nowPlaying);
 
         // No station info - early exit and clear interval
-        if (!decodedNovPlaying || decodedNovPlaying === 'undefined') {
+        if (!nowPlaying || nowPlaying === 'undefined') {
           setInfo('No info...');
 
           return clearInterval(interval);
@@ -40,9 +39,9 @@ const StationPlayer = () => {
 
         setInfo((prevInfo) => {
           // Avoid setting state if the values are equal
-          if (prevInfo === decodedNovPlaying) return prevInfo;
+          if (prevInfo === nowPlaying) return prevInfo;
 
-          return decodedNovPlaying;
+          return nowPlaying;
         });
       } catch (error) {
         console.error('API request failed:', error);
