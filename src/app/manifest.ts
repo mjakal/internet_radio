@@ -1,3 +1,8 @@
+/*
+ * Generate icons for all device types
+ * https://www.pwabuilder.com/imagegenerator
+ */
+
 import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
