@@ -51,7 +51,7 @@ const Filter: React.FC<FilterProps> = ({ onFilter }) => {
   };
 
   return (
-    <div className="col-span-12 md:col-span-6 xl:col-span-4" onSubmit={onSubmit}>
+    <div className="col-span-12 md:col-span-12 lg:col-span-6 xl:col-span-6" onSubmit={onSubmit}>
       <div className="relative flex items-center">
         <FilterIcon />
         <input
@@ -66,11 +66,11 @@ const Filter: React.FC<FilterProps> = ({ onFilter }) => {
           }}
           onKeyDown={handleKeyDown}
           placeholder="Search..."
-          className="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-10 w-full rounded-l-md border border-gray-200 bg-transparent py-2.5 pr-14 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[430px] dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30"
+          className="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-l-md border border-gray-200 bg-transparent py-2.5 pr-14 pl-12 text-base text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[430px] dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30"
         />
         <button
           type="button"
-          className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 px-4 py-2 text-white"
+          className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 h-11 px-4 py-2 text-white"
           title="Advanced Filter"
           onClick={openModal}
         >
@@ -78,7 +78,7 @@ const Filter: React.FC<FilterProps> = ({ onFilter }) => {
         </button>
         <button
           type="submit"
-          className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 rounded-r-md px-4 py-2 text-white"
+          className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 h-11 rounded-r-md px-4 py-2 text-white"
           title="Filter Stations"
           onClick={onSubmit}
         >
