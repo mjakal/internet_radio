@@ -11,7 +11,7 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   alt,
   ...props
 }) => {
-  const [imgSrc, setImgSrc] = useState<string>(src ? src : fallbackSrc);
+  const [imgSrc, setImgSrc] = useState<string>(src && typeof src === 'string' ? src : fallbackSrc);
 
   const handleError = () => {
     setImgSrc((prevState) => {

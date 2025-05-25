@@ -67,7 +67,7 @@ const StationPlayer = () => {
           <div className="relative mb-3 h-32 w-32 sm:mb-0">
             <ImageWithFallback
               src={favicon}
-              fallbackSrc="/images/cards/station-fallback.jpg"
+              fallbackSrc="/images/logo.png"
               width={100}
               height={100}
               alt={name}
@@ -124,7 +124,7 @@ const StationPlayer = () => {
             <div className="inline-flex h-12 w-12">
               <ImageWithFallback
                 src={favicon}
-                fallbackSrc="/images/cards/station-fallback.jpg"
+                fallbackSrc="/images/logo.png"
                 width={100}
                 height={100}
                 alt={name}
