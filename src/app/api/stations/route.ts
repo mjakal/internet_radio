@@ -116,7 +116,7 @@ async function fetchRadioBrowserStations(
           station_id: stationuuid,
           name,
           url: url_resolved || url,
-          favicon,
+          favicon: favicon || '',
           tags,
           codec,
           bitrate,

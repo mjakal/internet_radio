@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { usePlayer } from '@/context/PlayerContext';
-import Image from 'next/image';
+import ImageWithFallback from '@/components/common/Image';
 import { SpeakerWaveIcon, AdjustmentsHorizontalIcon, TagIcon } from '@heroicons/react/24/outline';
 import { StopIcon } from '@heroicons/react/24/solid';
 import { truncateString } from '@/helpers';
@@ -65,8 +65,9 @@ const StationPlayer = () => {
       <div className="hidden bg-transparent p-4 md:block dark:bg-transparent">
         <div className="flex-none sm:flex">
           <div className="relative mb-3 h-32 w-32 sm:mb-0">
-            <Image
-              src={favicon ? favicon : '/images/cards/station-fallback.jpg'}
+            <ImageWithFallback
+              src={favicon}
+              fallbackSrc="/images/cards/station-fallback.jpg"
               width={100}
               height={100}
               alt={name}
@@ -121,8 +122,9 @@ const StationPlayer = () => {
         <div className="flex items-center justify-between">
           <div className="mr-auto flex items-center">
             <div className="inline-flex h-12 w-12">
-              <Image
-                src={favicon ? favicon : '/images/cards/station-fallback.jpg'}
+              <ImageWithFallback
+                src={favicon}
+                fallbackSrc="/images/cards/station-fallback.jpg"
                 width={100}
                 height={100}
                 alt={name}

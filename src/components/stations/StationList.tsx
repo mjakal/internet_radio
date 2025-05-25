@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import Image from 'next/image';
+import ImageWithFallback from '@/components/common/Image';
 import { PlayIcon, StarIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { StarIcon as StarIconOutline } from '@heroicons/react/24/outline';
 import { RadioStation } from '@/app/types';
@@ -37,8 +37,9 @@ const StationList: React.FC<StationListProps> = ({
             <div className="flex items-center justify-between">
               <div className="mr-auto flex items-center" onClick={() => playStation(station)}>
                 <div className="inline-flex h-12 w-12">
-                  <Image
-                    src={favicon ? favicon : '/images/cards/station-fallback.jpg'}
+                  <ImageWithFallback
+                    src={favicon}
+                    fallbackSrc="/images/cards/station-fallback.jpg"
                     width={100}
                     height={100}
                     alt={name}
