@@ -22,11 +22,13 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 
   useEffect(() => {
     setImgSrc((prevState) => {
-      if (prevState === src) return prevState;
+      const nextSrc = src ? src : fallbackSrc;
 
-      return src;
+      if (prevState === nextSrc) return prevState;
+
+      return nextSrc;
     });
-  }, [src]);
+  }, [src, fallbackSrc]);
 
   const handleError = useCallback(() => {
     setImgSrc((prevState) => {
