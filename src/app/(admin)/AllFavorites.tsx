@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { usePlayer } from '@/context/PlayerContext';
-import { NoData } from '@/components/common/ApiComponents';
 import StationList from '@/components/stations/StationList';
 
 export default function AllFavorites() {
@@ -18,7 +17,13 @@ export default function AllFavorites() {
           onFavorite={deleteFavorite}
         />
       ) : (
-        <NoData />
+        <div className="col-span-12 space-y-6 rounded-2xl border border-gray-200 bg-white p-5 xl:col-span-12 dark:border-gray-800 dark:bg-white/[0.03]">
+          <div className="my-3 flex justify-center">
+            <p className="text-gray-500 dark:text-gray-400">
+              No favorites yet. Tap the menu in the top-left, head to Stations, and add a few!
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );
