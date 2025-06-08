@@ -4,9 +4,12 @@
 import { NextResponse } from 'next/server';
 import dns from 'dns';
 import { promisify } from 'util';
+import { RadioBrowserStation, RadioStation } from '../../types';
 
 // Refresh server dns list every hour
 const REFRESH_INTERVAL: number = 3600000;
+// Refresh stations cache every 24 hours
+const REFRESH_INTERVAL_STATIONS: number = 3600000 * 24;
 const RETRY_LIMIT: number = 3;
 const FALLBACK_SERVERS: string[] = [
   'de1.api.radio-browser.info',
@@ -18,17 +21,10 @@ const CACHED_SERVERS: { servers: string[]; lastUpdate: number; retryFetch: numbe
   lastUpdate: 0,
   retryFetch: 0,
 };
-
-interface RadioBrowserStation {
-  stationuuid: string;
-  name: string;
-  url_resolved?: string;
-  url: string;
-  favicon: string;
-  tags: string;
-  codec?: string;
-  bitrate?: number;
-}
+const CACHED_STATIONS: { data: { [key: string]: RadioStation[] }; cacheGeneratedAt: number } = {
+  data: {},
+  cacheGeneratedAt: 0,
+};
 
 const resolveSrv = promisify(dns.resolveSrv);
 
@@ -56,6 +52,27 @@ async function getRadioBrowserServers(): Promise<string[]> {
   }
 }
 
+function getCachedStations(queryKey: string) {
+  const { data, cacheGeneratedAt } = CACHED_STATIONS;
+  const currentTimestamp = Date.now();
+  const hasExpired = currentTimestamp > cacheGeneratedAt + REFRESH_INTERVAL_STATIONS;
+
+  if (hasExpired) {
+    CACHED_STATIONS['data'] = {};
+    CACHED_STATIONS['cacheGeneratedAt'] = currentTimestamp;
+
+    return null;
+  }
+
+  const cachedStations = data[queryKey] || null;
+
+  return cachedStations;
+}
+
+function setCachedStations(queryKey: string, data: RadioStation[]) {
+  CACHED_STATIONS['data'][queryKey] = data;
+}
+
 async function fetchRadioBrowserStations(
   query: string,
   tag: string,
@@ -64,6 +81,14 @@ async function fetchRadioBrowserStations(
   offset: number,
 ) {
   try {
+    const queryKey = Buffer.from(`${query}:${tag}:${country}:${limit}:${offset}`).toString(
+      'base64',
+    );
+    const cachedStations = getCachedStations(queryKey);
+
+    // Early Exit - return cached stations to the client
+    if (cachedStations) return cachedStations;
+
     const servers = await getRadioBrowserServers();
     const server = servers[Math.floor(Math.random() * servers.length)];
 
@@ -98,10 +123,9 @@ async function fetchRadioBrowserStations(
     }
 
     const data = await response.json();
+    const stationData: RadioStation[] = [];
 
-    CACHED_SERVERS['retryFetch'] = 0;
-
-    return data.map(
+    data.forEach(
       ({
         stationuuid,
         name,
@@ -112,7 +136,7 @@ async function fetchRadioBrowserStations(
         codec,
         bitrate,
       }: RadioBrowserStation) => {
-        return {
+        stationData.push({
           station_id: stationuuid,
           name,
           url: url_resolved || url,
@@ -120,9 +144,15 @@ async function fetchRadioBrowserStations(
           tags,
           codec,
           bitrate,
-        };
+        });
       },
     );
+
+    CACHED_SERVERS['retryFetch'] = 0;
+
+    setCachedStations(queryKey, stationData);
+
+    return stationData;
   } catch (error) {
     CACHED_SERVERS['retryFetch'] = 0;
 
