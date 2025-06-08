@@ -69,10 +69,6 @@ function getCachedStations(queryKey: string) {
   return cachedStations;
 }
 
-function setCachedStations(queryKey: string, data: RadioStation[]) {
-  CACHED_STATIONS['data'][queryKey] = data;
-}
-
 async function fetchRadioBrowserStations(
   query: string,
   tag: string,
@@ -149,8 +145,7 @@ async function fetchRadioBrowserStations(
     );
 
     CACHED_SERVERS['retryFetch'] = 0;
-
-    setCachedStations(queryKey, stationData);
+    CACHED_STATIONS['data'][queryKey] = stationData;
 
     return stationData;
   } catch (error) {

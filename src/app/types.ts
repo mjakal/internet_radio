@@ -1,4 +1,4 @@
-interface RadioBrowserStation {
+export interface RadioBrowserStation {
   stationuuid: string;
   name: string;
   url_resolved?: string;
