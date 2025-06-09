@@ -1,13 +1,21 @@
 'use client';
 
 import type React from 'react';
-import { createContext, useState, useContext, useEffect, useRef, RefObject } from 'react';
+import {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+  useRef,
+  RefObject,
+} from 'react';
 import { Howl } from 'howler';
 import { RadioStation } from '@/app/types';
 
 const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
 
-const clientPlayback = (playerRef: RefObject<Howl | null>, station: RadioStation) => {
+const clientPlayback = (station: RadioStation, playerRef: RefObject<Howl | null>) => {
   try {
     const { current: player } = playerRef;
 
@@ -108,19 +116,27 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     checkPlaybackStatus();
   }, []);
 
-  const playStation = async (station: RadioStation | null) => {
-    // Early exit - station not defined
-    if (!station) return;
+  const playStation = useCallback(
+    async (nextStation: RadioStation | null) => {
+      // Early exit - station not defined
+      if (!nextStation) return;
 
-    const playbackStatus =
-      PLAYER_TYPE === 'SERVER' ? await serverPlayback(station) : clientPlayback(playerRef, station);
+      // Early exit - station already playing
+      if (nextStation.station_id === station?.station_id) return;
 
-    if (playbackStatus === 'ERROR') return;
+      const playbackStatus =
+        PLAYER_TYPE === 'SERVER'
+          ? await serverPlayback(nextStation)
+          : clientPlayback(nextStation, playerRef);
 
-    setStation(station);
-  };
+      if (playbackStatus === 'ERROR') return;
 
-  const stopPlayback = () => {
+      setStation(nextStation);
+    },
+    [station],
+  );
+
+  const stopPlayback = useCallback(() => {
     if (PLAYER_TYPE === 'SERVER') {
       fetch('/api/player', {
         method: 'DELETE',
@@ -137,9 +153,9 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
 
     setStation(null);
-  };
+  }, []);
 
-  const addFavorite = async (station: RadioStation) => {
+  const addFavorite = useCallback(async (station: RadioStation) => {
     try {
       const isStandalone = PLAYER_TYPE === 'STANDALONE';
 
@@ -161,9 +177,9 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } catch (error) {
       console.error('API request failed:', error);
     }
-  };
+  }, []);
 
-  const deleteFavorite = async (station: RadioStation) => {
+  const deleteFavorite = useCallback(async (station: RadioStation) => {
     try {
       const isStandalone = PLAYER_TYPE === 'STANDALONE';
 
@@ -186,7 +202,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } catch (error) {
       console.error('API request failed:', error);
     }
-  };
+  }, []);
 
   return (
     <PlayerContext.Provider
