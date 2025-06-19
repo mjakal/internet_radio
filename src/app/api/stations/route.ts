@@ -43,7 +43,7 @@ async function fetchRadioBrowserStations(
       reverse: 'true',
     });
     const headers = {
-      'User-Agent': 'InternetRadioApp/1.0',
+      'User-Agent': 'SiliconRadio/1.0',
       'Content-Type': 'application/json',
     };
     const requestURL = `https://${server}/json/${endpoint}?${params}`;
@@ -118,6 +118,24 @@ export async function GET(request: Request) {
     return NextResponse.json(stations);
   } catch (error) {
     console.error('Error in GET handler:', error);
+    return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const data = await request.json(); // Parse JSON body
+    const { station_id } = data;
+    const server = await SERVERS_CACHE.getRandomServer();
+
+    // api throws an error something is wrong, station id is parsed correctly, please check the docs
+    const response = await fetch(`https://${server}/json/url/${station_id}`);
+
+    if (!response.ok) return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
+
+    return NextResponse.json({ station_id });
+  } catch (error) {
+    console.error('Error in POST handler:', error);
     return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
   }
 }

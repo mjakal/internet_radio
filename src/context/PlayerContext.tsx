@@ -124,6 +124,14 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // Early exit - station already playing
       if (nextStation.station_id === station?.station_id) return;
 
+      // Inform the backend to register this station click with the Radio Browser API
+      // This helps track popular stations and keeps the public database up-to-date
+      fetch('/api/stations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nextStation),
+      });
+
       const playbackStatus =
         PLAYER_TYPE === 'SERVER'
           ? await serverPlayback(nextStation)
