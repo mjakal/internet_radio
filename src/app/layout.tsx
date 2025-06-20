@@ -3,6 +3,9 @@ import './globals.css';
 
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+import GoogleAnalytics from '@/lib/ga';
+
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -29,6 +32,7 @@ export default function RootLayout({
           <SidebarProvider>{children}</SidebarProvider>
         </ThemeProvider>
       </body>
+      <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
     </html>
   );
 }
