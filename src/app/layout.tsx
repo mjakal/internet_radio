@@ -31,8 +31,8 @@ export default function RootLayout({
         <ThemeProvider>
           <SidebarProvider>{children}</SidebarProvider>
         </ThemeProvider>
+        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
       </body>
-      <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
     </html>
   );
 }
