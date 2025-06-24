@@ -12,8 +12,8 @@ const outfit = Outfit({
 });
 
 export const metadata = {
-  title: 'Silicon Radio',
-  description: 'Internet Radio Player',
+  title: 'Silicon Radio: Stream Free Global Radio Stations Online',
+  description: 'Tune into free online radio stations across every genre and country. Silicon Radio delivers live music, news, sports & talk with zero ads and zero cost.',
   icons: {
     icon: '/ios/32.png',
     apple: '/ios/180.png',
