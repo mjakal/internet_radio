@@ -4,6 +4,8 @@ This app is intended for streaming internet radio stations. Its primary objectiv
 
 At least that’s the goal. I guess we’ll see how it goes :).
 
+Check out the [Live Demo](https://silicon-radio.net) to see the project in action.
+
 ## Project requirements
 
 To run this project, ensure that the latest versions of Node.js and npm are installed on your system.
