@@ -43,7 +43,7 @@ const clientPlayback = async (
     const player = new shaka.Player(audioEl);
     playerRef.current = player;
 
-    player.addEventListener('error', (event: any) => {
+    player.addEventListener('error', (event: shaka.util.ErrorEvent) => {
       console.error('Shaka Player Error:', event.detail);
     });
 
