@@ -10,50 +10,30 @@ import {
   useRef,
   RefObject,
 } from 'react';
-import shaka from 'shaka-player';
+import { Howl } from 'howler';
 import { RadioStation } from '@/app/types';
 
 const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
 
-// Wrap Shaka initialization for client playback
-const clientPlayback = async (
-  station: RadioStation,
-  audioRef: RefObject<HTMLAudioElement>,
-  playerRef: RefObject<shaka.Player | null>,
-) => {
+const clientPlayback = (station: RadioStation, playerRef: RefObject<Howl | null>) => {
   try {
-    const { current: audioEl } = audioRef;
-    if (!audioEl) return 'ERROR';
+    const { current: player } = playerRef;
 
-    // Clean up old player
-    if (playerRef.current) {
-      await playerRef.current.destroy();
-      playerRef.current = null;
-    }
+    if (player) player.unload();
 
-    // Install Shaka polyfills
-    shaka.polyfill.installAll();
-
-    if (!shaka.Player.isBrowserSupported()) {
-      console.error('Browser not supported by Shaka');
-      return 'ERROR';
-    }
-
-    // Init player
-    const player = new shaka.Player(audioEl);
-    playerRef.current = player;
-
-    player.addEventListener('error', (event: shaka.util.ErrorEvent) => {
-      console.error('Shaka Player Error:', event.detail);
+    const newPlayer = new Howl({
+      src: [station.url],
+      html5: true,
+      format: ['mp3', 'aac'],
     });
 
-    // Load the stream (HLS or DASH)
-    await player.load(station.url);
-    audioEl.play();
+    newPlayer.play();
+    playerRef.current = newPlayer;
 
     return 'DONE';
   } catch (error) {
-    console.error('Playback failed:', error);
+    console.error('API request failed:', error);
+
     return 'ERROR';
   }
 };
@@ -69,6 +49,7 @@ const serverPlayback = async (station: RadioStation | null) => {
     return 'DONE';
   } catch (error) {
     console.error('API request failed:', error);
+
     return 'ERROR';
   }
 };
@@ -87,9 +68,7 @@ const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [favorites, setFavorites] = useState<RadioStation[]>([]);
   const [station, setStation] = useState<RadioStation | null>(null);
-
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const playerRef = useRef<shaka.Player | null>(null);
+  const playerRef = useRef<Howl | null>(null);
 
   useEffect(() => {
     // Initialize Favorites
@@ -97,6 +76,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       try {
         const response = await fetch('/api/favorites');
         const { data } = await response.json();
+
         setFavorites(data);
       } catch (err) {
         console.error(err);
@@ -106,6 +86,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const getFavoritesLocalStorage = () => {
       const storedFavorites = localStorage.getItem('favorites');
       const favorites: RadioStation[] = storedFavorites ? JSON.parse(storedFavorites) : [];
+
       setFavorites(favorites);
     };
 
@@ -122,20 +103,29 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       try {
         const response = await fetch('/api/player?type=status');
         const { playback, data } = await response.json();
+
         if (playback) setStation({ ...data });
       } catch (error) {
         console.error('API request failed:', error);
       }
     };
 
-    if (PLAYER_TYPE === 'SERVER') checkPlaybackStatus();
+    // Early exit - client side playback
+    if (PLAYER_TYPE !== 'SERVER') return;
+
+    checkPlaybackStatus();
   }, []);
 
   const playStation = useCallback(
     async (nextStation: RadioStation | null) => {
+      // Early exit - station not defined
       if (!nextStation) return;
+
+      // Early exit - station already playing
       if (nextStation.station_id === station?.station_id) return;
 
+      // Inform the backend to register this station click with the Radio Browser API
+      // This helps track popular stations and keeps the public database up-to-date
       fetch('/api/stations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -145,7 +135,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const playbackStatus =
         PLAYER_TYPE === 'SERVER'
           ? await serverPlayback(nextStation)
-          : await clientPlayback(nextStation, audioRef, playerRef);
+          : clientPlayback(nextStation, playerRef);
 
       if (playbackStatus === 'ERROR') return;
 
@@ -161,12 +151,13 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         headers: { 'Content-Type': 'application/json' },
       });
     } else {
-      playerRef.current?.destroy();
+      const { current: player } = playerRef;
+
+      if (!player) return;
+
+      player.unload();
+
       playerRef.current = null;
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-      }
     }
 
     setStation(null);
@@ -186,7 +177,9 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       setFavorites((prevState) => {
         const nextState = [...prevState, { ...station }];
+
         if (isStandalone) localStorage.setItem('favorites', JSON.stringify(nextState));
+
         return nextState;
       });
     } catch (error) {
@@ -209,7 +202,9 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setFavorites((prevState) => {
         const { station_id } = station;
         const nextState = prevState.filter((item) => item.station_id !== station_id);
+
         if (isStandalone) localStorage.setItem('favorites', JSON.stringify(nextState));
+
         return nextState;
       });
     } catch (error) {
@@ -222,16 +217,16 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       value={{ station, favorites, playStation, stopPlayback, addFavorite, deleteFavorite }}
     >
       {children}
-      {/* Hidden audio element controlled by Shaka */}
-      <audio ref={audioRef} controls={false} />
     </PlayerContext.Provider>
   );
 };
 
 export const usePlayer = () => {
   const context = useContext(PlayerContext);
+
   if (context === undefined) {
     throw new Error('usePlayer must be used within a PlayerProvider');
   }
+
   return context;
 };
