@@ -6,12 +6,13 @@ import StationList from '@/components/stations/StationList';
 
 export default function AllFavorites() {
   const { favorites, playStation, deleteFavorite } = usePlayer();
+  const reverseFavorites = [...favorites].reverse();
 
   return (
     <div className="col-span-12 space-y-6 xl:col-span-12">
       {favorites.length ? (
         <StationList
-          stations={favorites}
+          stations={reverseFavorites}
           type="DELETE"
           playStation={playStation}
           onFavorite={deleteFavorite}
