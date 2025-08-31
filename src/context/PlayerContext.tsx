@@ -21,10 +21,13 @@ const clientPlayback = (station: RadioStation, playerRef: RefObject<Howl | null>
 
     if (player) player.unload();
 
+    // Create the proxied URL to bypass CORS and other connection issues.
+    const proxiedUrl = `/api/proxy?url=${encodeURIComponent(station.url)}`;
+
     const newPlayer = new Howl({
-      src: [station.url],
+      src: [proxiedUrl], // Use the proxied URL for playback
       html5: true,
-      format: ['mp3', 'aac'],
+      format: ['mp3', 'aac'], // Give Howler hints about the format
     });
 
     newPlayer.play();
@@ -32,8 +35,7 @@ const clientPlayback = (station: RadioStation, playerRef: RefObject<Howl | null>
 
     return 'DONE';
   } catch (error) {
-    console.error('API request failed:', error);
-
+    console.error('Error during client playback setup:', error);
     return 'ERROR';
   }
 };
