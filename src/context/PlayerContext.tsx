@@ -1,45 +1,13 @@
 'use client';
 
 import type React from 'react';
-import {
-  createContext,
-  useState,
-  useContext,
-  useEffect,
-  useCallback,
-  useRef,
-  RefObject,
-} from 'react';
-import { Howl } from 'howler';
+import { createContext, useState, useContext, useEffect, useCallback, useMemo } from 'react';
+import ReactPlayer from 'react-player';
 import { RadioStation } from '@/app/types';
 
 const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
 
-const clientPlayback = (station: RadioStation, playerRef: RefObject<Howl | null>) => {
-  try {
-    const { current: player } = playerRef;
-
-    if (player) player.unload();
-
-    // Create the proxied URL to bypass CORS and other connection issues.
-    const proxiedUrl = `/api/proxy?url=${encodeURIComponent(station.url)}`;
-
-    const newPlayer = new Howl({
-      src: [proxiedUrl], // Use the proxied URL for playback
-      html5: true,
-      format: ['mp3', 'aac'], // Give Howler hints about the format
-    });
-
-    newPlayer.play();
-    playerRef.current = newPlayer;
-
-    return 'DONE';
-  } catch (error) {
-    console.error('Error during client playback setup:', error);
-    return 'ERROR';
-  }
-};
-
+// Server-side playback function remains unchanged.
 const serverPlayback = async (station: RadioStation | null) => {
   try {
     await fetch('/api/player', {
@@ -47,11 +15,9 @@ const serverPlayback = async (station: RadioStation | null) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(station),
     });
-
     return 'DONE';
   } catch (error) {
     console.error('API request failed:', error);
-
     return 'ERROR';
   }
 };
@@ -59,6 +25,7 @@ const serverPlayback = async (station: RadioStation | null) => {
 type PlayerContextType = {
   station: RadioStation | null;
   favorites: RadioStation[];
+  isLoading: boolean;
   playStation: (station: RadioStation | null) => void;
   stopPlayback: () => void;
   addFavorite: (station: RadioStation) => void;
@@ -70,7 +37,7 @@ const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [favorites, setFavorites] = useState<RadioStation[]>([]);
   const [station, setStation] = useState<RadioStation | null>(null);
-  const playerRef = useRef<Howl | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Initialize Favorites
@@ -78,7 +45,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       try {
         const response = await fetch('/api/favorites');
         const { data } = await response.json();
-
         setFavorites(data);
       } catch (err) {
         console.error(err);
@@ -88,7 +54,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const getFavoritesLocalStorage = () => {
       const storedFavorites = localStorage.getItem('favorites');
       const favorites: RadioStation[] = storedFavorites ? JSON.parse(storedFavorites) : [];
-
       setFavorites(favorites);
     };
 
@@ -100,69 +65,59 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   useEffect(() => {
-    // Initialize Player
+    // Initialize Player status for server-side playback
     const checkPlaybackStatus = async () => {
       try {
         const response = await fetch('/api/player?type=status');
         const { playback, data } = await response.json();
-
         if (playback) setStation({ ...data });
       } catch (error) {
         console.error('API request failed:', error);
       }
     };
 
-    // Early exit - client side playback
-    if (PLAYER_TYPE !== 'SERVER') return;
-
-    checkPlaybackStatus();
+    if (PLAYER_TYPE === 'SERVER') {
+      checkPlaybackStatus();
+    }
   }, []);
 
   const playStation = useCallback(
     async (nextStation: RadioStation | null) => {
-      // Early exit - station not defined
-      if (!nextStation) return;
+      if (!nextStation || nextStation.station_id === station?.station_id) {
+        return;
+      }
 
-      // Early exit - station already playing
-      if (nextStation.station_id === station?.station_id) return;
+      setIsLoading(true);
 
-      // Inform the backend to register this station click with the Radio Browser API
-      // This helps track popular stations and keeps the public database up-to-date
+      // Inform the backend to register this station click
       fetch('/api/stations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nextStation),
       });
 
-      const playbackStatus =
-        PLAYER_TYPE === 'SERVER'
-          ? await serverPlayback(nextStation)
-          : clientPlayback(nextStation, playerRef);
-
-      if (playbackStatus === 'ERROR') return;
-
-      setStation(nextStation);
+      if (PLAYER_TYPE === 'SERVER') {
+        const playbackStatus = await serverPlayback(nextStation);
+        if (playbackStatus === 'DONE') {
+          setStation(nextStation);
+        }
+        setIsLoading(false);
+      } else {
+        // Set the new station. The player will start loading it.
+        setStation(nextStation);
+      }
     },
     [station],
   );
 
   const stopPlayback = useCallback(() => {
     if (PLAYER_TYPE === 'SERVER') {
-      fetch('/api/player', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      });
-    } else {
-      const { current: player } = playerRef;
-
-      if (!player) return;
-
-      player.unload();
-
-      playerRef.current = null;
+      fetch('/api/player', { method: 'DELETE' });
     }
 
+    // For client playback, updating state is enough.
     setStation(null);
+    setIsLoading(false);
   }, []);
 
   const addFavorite = useCallback(async (station: RadioStation) => {
@@ -179,9 +134,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       setFavorites((prevState) => {
         const nextState = [...prevState, { ...station }];
-
         if (isStandalone) localStorage.setItem('favorites', JSON.stringify(nextState));
-
         return nextState;
       });
     } catch (error) {
@@ -204,9 +157,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setFavorites((prevState) => {
         const { station_id } = station;
         const nextState = prevState.filter((item) => item.station_id !== station_id);
-
         if (isStandalone) localStorage.setItem('favorites', JSON.stringify(nextState));
-
         return nextState;
       });
     } catch (error) {
@@ -214,21 +165,42 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, []);
 
+  // Memoize the context value to prevent unnecessary re-renders of consumers.
+  const contextValue = useMemo(
+    () => ({
+      station,
+      favorites,
+      isLoading,
+      playStation,
+      stopPlayback,
+      addFavorite,
+      deleteFavorite,
+    }),
+    [station, favorites, isLoading, playStation, stopPlayback, addFavorite, deleteFavorite],
+  );
+
+  // Check if the react-player should be rendered
+  const renderReactPlayer = PLAYER_TYPE !== 'SERVER' && station;
+
   return (
-    <PlayerContext.Provider
-      value={{ station, favorites, playStation, stopPlayback, addFavorite, deleteFavorite }}
-    >
+    <PlayerContext.Provider value={contextValue}>
       {children}
+      {renderReactPlayer && (
+        <ReactPlayer
+          src={`/api/proxy?url=${encodeURIComponent(station.url)}`}
+          playing={true}
+          height={0}
+          width={0}
+        />
+      )}
     </PlayerContext.Provider>
   );
 };
 
 export const usePlayer = () => {
   const context = useContext(PlayerContext);
-
   if (context === undefined) {
     throw new Error('usePlayer must be used within a PlayerProvider');
   }
-
   return context;
 };
