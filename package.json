@@ -21,8 +21,8 @@
     "next": "^15.3.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-player": "^3.3.2",
     "react-select": "^5.10.1",
+    "shaka-player": "^4.16.0",
     "tailwind-merge": "^2.6.0",
     "xml2js": "^0.6.2"
   },

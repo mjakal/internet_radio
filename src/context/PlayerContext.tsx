@@ -2,7 +2,7 @@
 
 import type React from 'react';
 import { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import ReactPlayer from 'react-player';
+import ShakaPlayer from '@/components/player/ShakaPlayer';
 import { RadioStation } from '@/app/types';
 
 const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
@@ -178,12 +178,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       value={{ station, favorites, playStation, stopPlayback, addFavorite, deleteFavorite }}
     >
       {renderReactPlayer && (
-        <ReactPlayer
-          src={`/api/proxy?url=${encodeURIComponent(station.url)}`}
-          playing={true}
-          height={0}
-          width={0}
-        />
+        <ShakaPlayer src={`/api/proxy?url=${encodeURIComponent(station.url)}`} />
       )}
       {children}
     </PlayerContext.Provider>
