@@ -9,37 +9,33 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Validate the URL before fetching to prevent errors
+    // Validate the URL
     new URL(url);
 
-    // Fetch the external audio stream on the server
+    // Fetch the external audio stream
     const response = await fetch(url, {
       headers: {
-        // Some servers require a user-agent to mimic a browser.
-        // Ensure this value is a string.
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       },
     });
 
-    // Check if the request to the stream server was successful
     if (!response.ok) {
       return new NextResponse(`Failed to fetch stream: ${response.statusText}`, {
         status: response.status,
       });
     }
 
-    // Get the response body as a ReadableStream
-    const stream = response.body;
+    // Forward the original Content-Type header
+    const contentType = response.headers.get('content-type') || 'audio/mpeg';
 
-    // Create a new response, streaming the audio body back to the client
-    // and passing through the original content-type headers.
-    return new NextResponse(stream, {
+    // Stream the response body back to the client
+    return new NextResponse(response.body, {
       status: response.status,
       statusText: response.statusText,
       headers: {
-        'Content-Type': response.headers.get('Content-Type') || 'audio/mpeg',
-        'Cache-Control': 'no-cache', // Prevent caching of the stream
+        'Content-Type': contentType,
+        'Cache-Control': 'no-cache',
       },
     });
   } catch (error) {
@@ -47,9 +43,10 @@ export async function GET(req: NextRequest) {
     if (error instanceof TypeError) {
       return new NextResponse('Invalid URL format', { status: 400 });
     }
+
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
 
-// Force dynamic execution for every request to ensure it runs on the server, bypassing static caching.
+// Force dynamic execution for every request
 export const dynamic = 'force-dynamic';
