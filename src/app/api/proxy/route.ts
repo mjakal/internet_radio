@@ -1,51 +1,88 @@
+// /api/proxy/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import https from 'https';
+import net from 'net';
+import { URL } from 'url';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const encodedUrl = searchParams.get('url');
+  const streamUrl = searchParams.get('url');
 
-  if (!encodedUrl) return new NextResponse('URL parameter is required', { status: 400 });
-
-  const decodedUrl = decodeURIComponent(encodedUrl);
+  if (!streamUrl) {
+    return new NextResponse('URL parameter is required', { status: 400 });
+  }
 
   try {
-    new URL(decodedUrl);
+    const targetUrl = new URL(streamUrl);
+    const host = targetUrl.hostname;
+    const port = parseInt(targetUrl.port || '80', 10);
 
-    const agent = decodedUrl.startsWith('https:')
-      ? new https.Agent({ rejectUnauthorized: false })
-      : undefined;
+    const proxyResponse = await new Promise<NextResponse>((resolve, reject) => {
+      // FIX: Declare controller in a scope accessible to all event handlers
+      let controller: ReadableStreamDefaultController<Uint8Array>;
 
-    const response = await fetch(decodedUrl, {
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      },
-      redirect: 'follow',
-      ...(agent ? { agent } : {}), // only add agent if defined
-    });
+      const socket = net.createConnection({ host, port }, () => {
+        const rawHttpRequest = [
+          `GET ${targetUrl.pathname}${targetUrl.search} HTTP/1.1`,
+          `Host: ${host}`,
+          'User-Agent: Mozilla/5.0',
+          'Connection: close',
+          '\r\n',
+        ].join('\r\n');
+        socket.write(rawHttpRequest);
 
-    if (!response.ok) {
-      return new NextResponse(`Failed to fetch stream: ${response.statusText}`, {
-        status: response.status,
+        // We can now resolve immediately because the stream body is defined
+        resolve(
+          new NextResponse(body, {
+            headers: {
+              'Content-Type': 'audio/mpeg',
+              'Cache-Control': 'no-cache, no-store',
+            },
+          }),
+        );
       });
-    }
 
-    const contentType = response.headers.get('content-type') || 'audio/mpeg';
+      let isStreamClosed = false;
 
-    return new NextResponse(response.body, {
-      status: response.status,
-      headers: {
-        'Content-Type': contentType,
-        'Cache-Control': 'no-cache',
-      },
+      // FIX: Use 'const' and initialize the stream immediately.
+      // FIX: Use the specific 'Uint8Array' type instead of 'any'.
+      const body = new ReadableStream<Uint8Array>({
+        start(c) {
+          controller = c;
+
+          socket.on('data', (chunk: Buffer) => {
+            if (!isStreamClosed) {
+              controller.enqueue(chunk);
+            }
+          });
+
+          socket.on('end', () => {
+            if (!isStreamClosed) {
+              isStreamClosed = true;
+              controller.close();
+            }
+          });
+        },
+        cancel() {
+          isStreamClosed = true;
+          socket.destroy();
+        },
+      });
+
+      socket.on('error', (err) => {
+        if (!isStreamClosed) {
+          isStreamClosed = true;
+          reject(err);
+          controller.error(err);
+        }
+      });
     });
+
+    return proxyResponse;
   } catch (error) {
-    console.error('Proxy error:', error);
-    if (error instanceof TypeError) return new NextResponse('Invalid URL format', { status: 400 });
+    console.error('[PROXY] FATAL: Caught error in top-level try/catch block.', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
