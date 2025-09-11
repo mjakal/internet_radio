@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import https from 'https';
 
-export const runtime = 'nodejs'; // Force Node.js runtime
-export const dynamic = 'force-dynamic'; // Avoid static caching
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -12,15 +13,19 @@ export async function GET(req: NextRequest) {
   const decodedUrl = decodeURIComponent(encodedUrl);
 
   try {
-    // Validate the URL
     new URL(decodedUrl);
 
-    // Fetch the external audio stream
+    const agent = decodedUrl.startsWith('https:')
+      ? new https.Agent({ rejectUnauthorized: false })
+      : undefined;
+
     const response = await fetch(decodedUrl, {
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       },
+      redirect: 'follow',
+      ...(agent ? { agent } : {}), // only add agent if defined
     });
 
     if (!response.ok) {
@@ -29,13 +34,10 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Forward the original Content-Type header
     const contentType = response.headers.get('content-type') || 'audio/mpeg';
 
-    // Stream the response body back to the client
     return new NextResponse(response.body, {
       status: response.status,
-      statusText: response.statusText,
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'no-cache',
@@ -43,10 +45,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Proxy error:', error);
-    if (error instanceof TypeError) {
-      return new NextResponse('Invalid URL format', { status: 400 });
-    }
-
+    if (error instanceof TypeError) return new NextResponse('Invalid URL format', { status: 400 });
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
