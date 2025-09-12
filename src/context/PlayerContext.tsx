@@ -175,7 +175,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     <PlayerContext.Provider
       value={{ station, favorites, playStation, stopPlayback, addFavorite, deleteFavorite }}
     >
-      <ClientPlayer station={station} />
+      {PLAYER_TYPE !== 'SERVER' && <ClientPlayer station={station} />}
       {children}
     </PlayerContext.Provider>
   );

@@ -20,7 +20,6 @@ export async function GET(req: NextRequest) {
     const port = parseInt(targetUrl.port || '80', 10);
 
     const proxyResponse = await new Promise<NextResponse>((resolve, reject) => {
-      // FIX: Declare controller in a scope accessible to all event handlers
       let controller: ReadableStreamDefaultController<Uint8Array>;
 
       const socket = net.createConnection({ host, port }, () => {
@@ -46,8 +45,6 @@ export async function GET(req: NextRequest) {
 
       let isStreamClosed = false;
 
-      // FIX: Use 'const' and initialize the stream immediately.
-      // FIX: Use the specific 'Uint8Array' type instead of 'any'.
       const body = new ReadableStream<Uint8Array>({
         start(c) {
           controller = c;
