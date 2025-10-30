@@ -87,7 +87,8 @@ async function fetchRadioBrowserStations(
     );
 
     // Store stations to cache
-    STATIONS_CACHE.setStations(queryKey, stationData);
+    if (stationData.length) STATIONS_CACHE.setStations(queryKey, stationData);
+
     // Reset retry counter
     RETRY_STATIONS_API['retryAttempt'] = 0;
 
