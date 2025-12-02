@@ -7,7 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import { parseStringPromise } from 'xml2js';
-import { RadioStation } from '@/app/types';
+import { RadioStation, StreamWatchdog } from '@/app/types';
 
 const JSON_OPTIONS = {
   explicitArray: false, // Always put child nodes in arrays
@@ -27,6 +27,10 @@ const CACHED_STATION: {
   station: RadioStation | null;
 } = {
   station: null,
+};
+const STREAM_WATCHDOG: StreamWatchdog = {
+  interval: null,
+  running: false,
 };
 
 async function vlcAPIHandler(urlSuffix: string) {
@@ -67,6 +71,45 @@ async function getPlaylist() {
   return { nowPlaying };
 }
 
+// Start watchdog
+function startWatchdog() {
+  if (STREAM_WATCHDOG.running) return; // already running
+
+  STREAM_WATCHDOG.running = true;
+
+  STREAM_WATCHDOG.interval = setInterval(async () => {
+    try {
+      const status = await getStatus();
+      const { station } = CACHED_STATION;
+
+      if (!status.playback && station?.url) {
+        console.log('Watchdog: playback stopped, retrying…');
+
+        const encodedURL = encodeURIComponent(station.url);
+
+        // Retry playback
+        await vlcAPIHandler('status.xml\?command\=pl_stop');
+        await vlcAPIHandler('status.xml?command=pl_empty');
+        await vlcAPIHandler(`status.xml?command=in_play&input=${encodedURL}`);
+      }
+    } catch (err) {
+      console.error('Watchdog error:', err);
+    }
+  }, 5000); // check every 5 seconds
+}
+
+// Stop watchdog
+function stopWatchdog() {
+  if (!STREAM_WATCHDOG.running) return;
+
+  if (STREAM_WATCHDOG.interval) {
+    clearInterval(STREAM_WATCHDOG.interval);
+    STREAM_WATCHDOG.interval = null;
+  }
+
+  STREAM_WATCHDOG.running = false;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -96,6 +139,9 @@ export async function POST(request: Request) {
 
     CACHED_STATION['station'] = { ...data };
 
+    // Start stream watchdog
+    startWatchdog();
+
     return NextResponse.json({ data });
   } catch (error) {
     console.error('Error in POST handler:', error);
@@ -111,6 +157,9 @@ export async function DELETE() {
     await vlcAPIHandler('status.xml?command=pl_empty');
 
     CACHED_STATION['station'] = null;
+
+    // Stop stream watchdog
+    stopWatchdog();
 
     return NextResponse.json({ playback: false, data: {} });
   } catch (error) {

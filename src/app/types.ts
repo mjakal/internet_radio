@@ -24,3 +24,8 @@ export interface FilterQuery {
   tag: string;
   country: string;
 }
+
+export interface StreamWatchdog {
+  interval: NodeJS.Timeout | null; // Node timer returned by setInterval
+  running: boolean; // whether the watchdog is active
+}
