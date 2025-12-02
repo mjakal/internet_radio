@@ -18,6 +18,7 @@ const getInitialStreamURL = (url: string): string => {
 
 const ClientPlayer: React.FC<{ station: RadioStation | null }> = ({ station }) => {
   const [streamUrl, setStreamUrl] = useState<string>('');
+  const [refreshKey, setRefreshKey] = useState<number>(0);
 
   // This effect runs whenever a new station is selected.
   // It resets the player's URL to the initial HTTPS attempt.
@@ -25,8 +26,13 @@ const ClientPlayer: React.FC<{ station: RadioStation | null }> = ({ station }) =
     if (station?.url) {
       const initialUrl = getInitialStreamURL(station.url);
       setStreamUrl(initialUrl);
+
+      // Increment version to remount player
+      setRefreshKey((prev) => prev + 1);
     } else {
+      // Reset to default values
       setStreamUrl('');
+      setRefreshKey(0);
     }
   }, [station]);
 
@@ -44,6 +50,9 @@ const ClientPlayer: React.FC<{ station: RadioStation | null }> = ({ station }) =
     // The HTTPS attempt failed, so now we switch to the proxied HTTP URL.
     const proxiedUrl = `/api/proxy?url=${encodeURIComponent(station.url)}`;
     setStreamUrl(proxiedUrl);
+
+    // Increment version to force remount
+    setRefreshKey((prev) => prev + 1);
   };
 
   // Check if the component should render
@@ -54,7 +63,7 @@ const ClientPlayer: React.FC<{ station: RadioStation | null }> = ({ station }) =
 
   return (
     <ReactPlayer
-      key={streamUrl} // The key ensures the player reloads with the new URL
+      key={`${streamUrl}-${refreshKey}`} // The key ensures the player reloads with the new URL
       src={streamUrl}
       playing={true}
       onError={handleError} // This is the crucial part

@@ -106,7 +106,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (playbackStatus === 'ERROR') return;
 
       // For the client side playback we just need to set nextStation to state
-      setStation(nextStation);
+      setStation({ ...nextStation });
     },
     [station],
   );

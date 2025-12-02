@@ -11,7 +11,7 @@ import MarqueeText from '../common/MarqueeText';
 const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
 
 const StationPlayer = () => {
-  const { station, stopPlayback } = usePlayer();
+  const { station, playStation, stopPlayback } = usePlayer();
   const [info, setInfo] = useState<string>('');
 
   useEffect(() => {
@@ -75,7 +75,10 @@ const StationPlayer = () => {
             />
           </div>
           <div className="flex-auto justify-evenly sm:ml-5">
-            <div className="flex items-center justify-between sm:mt-2">
+            <div
+              className="flex cursor-pointer items-center justify-between sm:mt-2"
+              onClick={() => playStation(station)}
+            >
               <div className="flex items-center">
                 <div className="flex flex-col">
                   <div className="w-full flex-none text-lg leading-none font-bold text-gray-800 dark:text-gray-200">
@@ -120,7 +123,10 @@ const StationPlayer = () => {
       {/* Mobile only */}
       <div className="mb-3 block flex transform cursor-pointer flex-col bg-transparent p-4 md:hidden dark:bg-transparent">
         <div className="flex items-center justify-between">
-          <div className="mr-auto flex items-center">
+          <div
+            className="mr-auto flex cursor-pointer items-center"
+            onClick={() => playStation(station)}
+          >
             <div className="inline-flex h-12 w-12">
               <ImageWithFallback
                 src={favicon}

@@ -89,6 +89,8 @@ export async function POST(request: Request) {
 
     // await stop payback
     await vlcAPIHandler('status.xml\?command\=pl_stop');
+    // await empty playlist
+    await vlcAPIHandler('status.xml?command=pl_empty');
     // await play audio stream
     await vlcAPIHandler(`status.xml\?command\=in_play\&input\=${encodedURL}`);
 
