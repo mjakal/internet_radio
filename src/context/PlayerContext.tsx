@@ -84,32 +84,29 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     checkPlaybackStatus();
   }, []);
 
-  const playStation = useCallback(
-    async (nextStation: RadioStation | null) => {
-      // Early exit - station not defined
-      if (!nextStation) return;
+  const playStation = useCallback(async (nextStation: RadioStation | null) => {
+    // Early exit - station not defined
+    if (!nextStation) return;
 
-      // Early exit - station already playing
-      // if (nextStation.station_id === station?.station_id) return;
+    // Early exit - station already playing
+    // if (nextStation.station_id === station?.station_id) return;
 
-      // Inform the backend to register this station click with the Radio Browser API
-      // This helps track popular stations and keeps the public database up-to-date
-      fetch('/api/stations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(nextStation),
-      });
+    // Inform the backend to register this station click with the Radio Browser API
+    // This helps track popular stations and keeps the public database up-to-date
+    fetch('/api/stations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nextStation),
+    });
 
-      const isServerPlayback = PLAYER_TYPE === 'SERVER';
-      const playbackStatus = isServerPlayback ? await serverPlayback(nextStation) : 'CLIENT';
+    const isServerPlayback = PLAYER_TYPE === 'SERVER';
+    const playbackStatus = isServerPlayback ? await serverPlayback(nextStation) : 'CLIENT';
 
-      if (playbackStatus === 'ERROR') return;
+    if (playbackStatus === 'ERROR') return;
 
-      // For the client side playback we just need to set nextStation to state
-      setStation({ ...nextStation });
-    },
-    [station],
-  );
+    // For the client side playback we just need to set nextStation to state
+    setStation({ ...nextStation });
+  }, []);
 
   const stopPlayback = useCallback(() => {
     if (PLAYER_TYPE === 'SERVER') {
