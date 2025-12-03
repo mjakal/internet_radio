@@ -33,144 +33,129 @@ const STREAM_WATCHDOG: StreamWatchdog = {
   running: false,
 };
 
+// --------------------------
+// VLC HTTP API helper
+// --------------------------
 async function vlcAPIHandler(urlSuffix: string) {
-  const requestURL = `${VLC_BASE_URL}${urlSuffix}`;
-
-  const response = await fetch(requestURL, {
+  const response = await fetch(`${VLC_BASE_URL}${urlSuffix}`, {
     method: 'GET',
     headers: { Authorization: `Basic ${VLC_AUTH}` },
   });
 
-  const xmlResponse = await response.text(); // Get response as string
-  const jsonResponse = await parseStringPromise(xmlResponse, JSON_OPTIONS); // Convert XML to JSON
-
-  return jsonResponse;
+  const xml = await response.text();
+  return parseStringPromise(xml, JSON_OPTIONS);
 }
 
+// --------------------------
+// Get playback status
+// --------------------------
 async function getStatus() {
-  const response = await vlcAPIHandler(`status.xml`);
-
+  const response = await vlcAPIHandler('status.xml');
   const playbackStatus = response?.root?.state?.value;
   const isPlaying = playbackStatus === 'playing';
 
   if (!isPlaying) return { playback: false, data: null };
 
-  const { station } = CACHED_STATION;
-
-  return { playback: true, data: station };
+  return { playback: true, data: CACHED_STATION.station };
 }
 
+// --------------------------
+// Get now playing metadata
+// --------------------------
 async function getPlaylist() {
-  const response = await vlcAPIHandler(`status.xml`);
-
-  // Get deep nested now playing info from vlc api
+  const response = await vlcAPIHandler('status.xml');
   const categoryInfo = response?.root?.information?.category[0]?.info;
   const metaInfo = Array.isArray(categoryInfo) ? categoryInfo : [];
-  const nowPlaying = metaInfo.find(({ name }) => name === 'now_playing')?.['value'] || '';
-
+  const nowPlaying = metaInfo.find((i: any) => i.name === 'now_playing')?.value || '';
   return { nowPlaying };
 }
 
-// Start watchdog
+// --------------------------
+// Watchdog
+// --------------------------
 function startWatchdog() {
-  if (STREAM_WATCHDOG.running) return; // already running
+  if (STREAM_WATCHDOG.running) return;
 
   STREAM_WATCHDOG.running = true;
 
-  const checkPlaybackStatus = async () => {
+  const checkPlayback = async () => {
     try {
       const { playback, data } = await getStatus();
+      if (playback) return; // already playing
+      if (!data?.url) return; // no station
 
-      // Early exit - stream is playing
-      if (playback) return;
-
-      // Early exit - stream url not defined
-      if (!data?.url) return;
-
-      console.log('Watchdog: playback stopped, retrying…');
-
+      console.log(`[Watchdog] Playback stopped, retrying ${data.url}…`);
       const encodedURL = encodeURIComponent(data.url);
 
-      // Retry playback
-      await vlcAPIHandler('status.xml\?command\=pl_stop');
+      await vlcAPIHandler('status.xml?command=pl_stop');
       await vlcAPIHandler('status.xml?command=pl_empty');
       await vlcAPIHandler(`status.xml?command=in_play&input=${encodedURL}`);
     } catch (err) {
-      console.error('Watchdog error:', err);
+      console.error('[Watchdog] Error:', err);
     }
   };
 
-  // Start watchdog service
-  STREAM_WATCHDOG.interval = setInterval(checkPlaybackStatus, 5000);
+  STREAM_WATCHDOG.interval = setInterval(checkPlayback, 5000);
 }
 
-// Stop watchdog
 function stopWatchdog() {
   if (!STREAM_WATCHDOG.running) return;
 
   STREAM_WATCHDOG.running = false;
-
-  // Early exit - interval not set
-  if (!STREAM_WATCHDOG.interval) return;
-
-  clearInterval(STREAM_WATCHDOG.interval);
+  if (STREAM_WATCHDOG.interval) clearInterval(STREAM_WATCHDOG.interval);
   STREAM_WATCHDOG.interval = null;
 }
 
+// --------------------------
+// API Handlers
+// --------------------------
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const requestType = searchParams.get('type') || 'status';
-
-    const response = requestType === 'status' ? await getStatus() : await getPlaylist();
-
-    return NextResponse.json({ ...response });
-  } catch (error) {
-    console.error('Error in GET handler:', error);
-    return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
+    const type = searchParams.get('type') || 'status';
+    const response = type === 'status' ? await getStatus() : await getPlaylist();
+    return NextResponse.json(response);
+  } catch (err) {
+    console.error('[GET] Error:', err);
+    return NextResponse.json({ error: 'API request failed' }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json(); // Parse JSON body
-    const { url: stationURL } = data;
-    const encodedURL = encodeURIComponent(stationURL);
+    const data: RadioStation = await request.json();
+    const encodedURL = encodeURIComponent(data.url);
 
-    // await stop payback
-    await vlcAPIHandler('status.xml\?command\=pl_stop');
-    // await empty playlist
+    // Stop existing playback
+    await vlcAPIHandler('status.xml?command=pl_stop');
     await vlcAPIHandler('status.xml?command=pl_empty');
-    // await play audio stream
-    await vlcAPIHandler(`status.xml\?command\=in_play\&input\=${encodedURL}`);
 
-    CACHED_STATION['station'] = { ...data };
+    // Start new stream
+    await vlcAPIHandler(`status.xml?command=in_play&input=${encodedURL}`);
+    CACHED_STATION.station = data;
 
-    // Start stream watchdog
+    // Start watchdog
     startWatchdog();
 
     return NextResponse.json({ data });
-  } catch (error) {
-    console.error('Error in POST handler:', error);
-    return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
+  } catch (err) {
+    console.error('[POST] Error:', err);
+    return NextResponse.json({ error: 'API request failed' }, { status: 500 });
   }
 }
 
 export async function DELETE() {
   try {
-    // await stop playback
-    await vlcAPIHandler(`status.xml\?command\=pl_stop`);
-    // await empty playlist
+    await vlcAPIHandler('status.xml?command=pl_stop');
     await vlcAPIHandler('status.xml?command=pl_empty');
 
-    CACHED_STATION['station'] = null;
+    CACHED_STATION.station = null;
 
-    // Stop stream watchdog
     stopWatchdog();
 
     return NextResponse.json({ playback: false, data: {} });
-  } catch (error) {
-    console.error('Error in GET handler:', error);
+  } catch (err) {
+    console.error('[DELETE] Error:', err);
     return NextResponse.json({ playback: false, data: {} }, { status: 500 });
   }
 }
