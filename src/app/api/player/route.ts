@@ -66,7 +66,7 @@ async function getPlaylist() {
   const response = await vlcAPIHandler('status.xml');
   const categoryInfo = response?.root?.information?.category[0]?.info;
   const metaInfo = Array.isArray(categoryInfo) ? categoryInfo : [];
-  const nowPlaying = metaInfo.find((i: any) => i.name === 'now_playing')?.value || '';
+  const nowPlaying = metaInfo.find((item) => item.name === 'now_playing')?.value || '';
   return { nowPlaying };
 }
 
