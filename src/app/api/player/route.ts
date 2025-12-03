@@ -77,37 +77,44 @@ function startWatchdog() {
 
   STREAM_WATCHDOG.running = true;
 
-  STREAM_WATCHDOG.interval = setInterval(async () => {
+  const checkPlaybackStatus = async () => {
     try {
-      const status = await getStatus();
-      const { station } = CACHED_STATION;
+      const { playback, data } = await getStatus();
 
-      if (!status.playback && station?.url) {
-        console.log('Watchdog: playback stopped, retrying…');
+      // Early exit - stream is playing
+      if (playback) return;
 
-        const encodedURL = encodeURIComponent(station.url);
+      // Early exit - stream url not defined
+      if (!data?.url) return;
 
-        // Retry playback
-        await vlcAPIHandler('status.xml\?command\=pl_stop');
-        await vlcAPIHandler('status.xml?command=pl_empty');
-        await vlcAPIHandler(`status.xml?command=in_play&input=${encodedURL}`);
-      }
+      console.log('Watchdog: playback stopped, retrying…');
+
+      const encodedURL = encodeURIComponent(data.url);
+
+      // Retry playback
+      await vlcAPIHandler('status.xml\?command\=pl_stop');
+      await vlcAPIHandler('status.xml?command=pl_empty');
+      await vlcAPIHandler(`status.xml?command=in_play&input=${encodedURL}`);
     } catch (err) {
       console.error('Watchdog error:', err);
     }
-  }, 5000); // check every 5 seconds
+  };
+
+  // Start watchdog service
+  STREAM_WATCHDOG.interval = setInterval(checkPlaybackStatus, 5000);
 }
 
 // Stop watchdog
 function stopWatchdog() {
   if (!STREAM_WATCHDOG.running) return;
 
-  if (STREAM_WATCHDOG.interval) {
-    clearInterval(STREAM_WATCHDOG.interval);
-    STREAM_WATCHDOG.interval = null;
-  }
-
   STREAM_WATCHDOG.running = false;
+
+  // Early exit - interval not set
+  if (!STREAM_WATCHDOG.interval) return;
+
+  clearInterval(STREAM_WATCHDOG.interval);
+  STREAM_WATCHDOG.interval = null;
 }
 
 export async function GET(request: Request) {
