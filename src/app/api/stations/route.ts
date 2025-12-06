@@ -2,6 +2,7 @@
 // https://api.radio-browser.info/
 
 import { NextResponse } from 'next/server';
+import validator from 'validator';
 import { RadioBrowserStation, RadioStation } from '../../types';
 import ServersCache from './ServersCache';
 import StationsCache from './StationsCache';
@@ -106,15 +107,24 @@ async function fetchRadioBrowserStations(
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get('query') || '';
-    const tag = searchParams.get('tag') || '';
-    const country = searchParams.get('country') || '';
-    const limit = parseInt(searchParams.get('limit') || '100');
-    const offset = parseInt(searchParams.get('offset') || '0');
+
+    // Sanitize strings
+    const query = validator.escape(searchParams.get('query') || '');
+    const tag = validator.escape(searchParams.get('tag') || '');
+    const country = validator.escape(searchParams.get('country') || '');
+
+    // Validate numeric params
+    const limitRaw = searchParams.get('limit') || '100';
+    const offsetRaw = searchParams.get('offset') || '0';
+
+    const limit = validator.isInt(limitRaw, { min: 1, max: 500 }) ? parseInt(limitRaw) : 100;
+    const offset = validator.isInt(offsetRaw, { min: 0 }) ? parseInt(offsetRaw) : 0;
 
     const stations = await fetchRadioBrowserStations(query, tag, country, limit, offset);
 
-    if (!stations) return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
+    if (!stations) {
+      return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
+    }
 
     return NextResponse.json(stations);
   } catch (error) {
@@ -126,7 +136,18 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const data = await request.json(); // Parse JSON body
-    const { station_id } = data;
+    const dirty_station_id = data?.station_id || '';
+
+    if (typeof dirty_station_id !== 'string') {
+      return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
+    }
+
+    const station_id = validator.escape(dirty_station_id);
+
+    if (!station_id) {
+      return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
+    }
+
     const server = await SERVERS_CACHE.getRandomServer();
 
     // api throws an error something is wrong, station id is parsed correctly, please check the docs
