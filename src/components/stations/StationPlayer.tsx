@@ -10,52 +10,74 @@ import MarqueeText from '../common/MarqueeText';
 
 const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER || 'CLIENT';
 
+// Define the shape of our state to link info to a specific URL
+interface StreamData {
+  url: string;
+  info: string;
+}
+
 const StationPlayer = () => {
   const { station, playStation, stopPlayback } = usePlayer();
-  const [info, setInfo] = useState<string>('');
+
+  // We store the info AND the url it belongs to
+  const [streamData, setStreamData] = useState<StreamData>({ url: '', info: '' });
 
   useEffect(() => {
-    // Early exit - station not playing
     if (!station) return;
 
+    // 1. Setup an ignore flag to prevent race conditions (React Strict Mode compliant)
+    let ignore = false;
     const { url } = station;
+
     const encodedUrl = encodeURIComponent(url);
     const endpointURL =
       PLAYER_TYPE === 'SERVER' ? '/api/player?type=playlist' : `/api/info?stream=${encodedUrl}`;
 
-    setInfo(''); // reset to initial state
-
     const getStreamInfo = async () => {
       try {
         const response = await fetch(endpointURL);
-        const { nowPlaying } = await response.json();
+        const data = await response.json();
+        const nowPlaying = data.nowPlaying;
 
-        // No station info - early exit and clear interval
+        // If the component unmounted or station changed, stop here
+        if (ignore) return;
+
         if (!nowPlaying || nowPlaying === 'undefined') {
-          setInfo('No info...');
-
-          return clearInterval(interval);
+          // Update state linked to THIS station url
+          setStreamData({ url, info: 'No info...' });
+        } else {
+          setStreamData((prev) => {
+            // Optimization: Only update if value actually changed
+            if (prev.url === url && prev.info === nowPlaying) return prev;
+            return { url, info: nowPlaying };
+          });
         }
-
-        setInfo((prevInfo) => {
-          // Avoid setting state if the values are equal
-          if (prevInfo === nowPlaying) return prevInfo;
-
-          return nowPlaying;
-        });
       } catch (error) {
-        console.error('API request failed:', error);
-        setInfo('No info...');
+        if (!ignore) {
+          console.error('API request failed:', error);
+          setStreamData({ url, info: 'No info...' });
+        }
       }
     };
 
-    const interval = setInterval(getStreamInfo, 5000); // every 5 seconds
+    // 2. Call immediately, then set interval
+    getStreamInfo();
+    const interval = setInterval(getStreamInfo, 5000);
 
-    return () => clearInterval(interval);
+    // 3. Cleanup: Clear interval and mark this specific effect execution as ignored
+    return () => {
+      ignore = true;
+      clearInterval(interval);
+    };
   }, [station]);
 
-  // Early exit - stop component rendering
   if (!station) return null;
+
+  // 4. DERIVED STATE:
+  // If the data in state belongs to the current station, show it.
+  // Otherwise, return empty string (effectively "Loading..." state).
+  // This resets the UI instantly without a state update.
+  const activeInfo = streamData.url === station.url ? streamData.info : '';
 
   const { favicon, name, tags, codec, bitrate } = station;
 
@@ -92,7 +114,8 @@ const StationPlayer = () => {
                   </div>
                   <div className="my-1 flex-auto text-gray-400 dark:text-gray-200">
                     <span className="mr-3">
-                      <StreamInfo info={info} />
+                      {/* Pass the derived activeInfo */}
+                      <StreamInfo info={activeInfo} />
                     </span>
                   </div>
                 </div>
@@ -107,7 +130,6 @@ const StationPlayer = () => {
                 <AdjustmentsHorizontalIcon className="h-4 w-4" />
                 <p className="ms-1">{bitrate ? bitrate + ' kbps' : '64 kbps'}</p>
               </div>
-              {/* can you set the icon to be inline*/}
               <button
                 type="button"
                 className="bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 rounded-r-md px-4 py-2 text-white"
@@ -144,7 +166,8 @@ const StationPlayer = () => {
                 <MarqueeText text={name} />
               </div>
               <p className="mt-1 w-40 truncate overflow-hidden text-sm leading-none whitespace-nowrap text-gray-400 sm:w-40 md:w-45 lg:w-45 xl:w-36 dark:text-gray-200">
-                <StreamInfo info={info} />
+                {/* Pass the derived activeInfo */}
+                <StreamInfo info={activeInfo} />
               </p>
             </div>
           </div>

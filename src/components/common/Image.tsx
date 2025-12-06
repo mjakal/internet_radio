@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 
 interface ImageWithFallbackProps {
@@ -18,34 +18,24 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   width,
   height,
 }) => {
-  const [imgSrc, setImgSrc] = useState<string>(src ? src : fallbackSrc);
+  // 1. Instead of a boolean, we track WHICH url failed
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    setImgSrc((prevState) => {
-      const nextSrc = src ? src : fallbackSrc;
-
-      if (prevState === nextSrc) return prevState;
-
-      return nextSrc;
-    });
-  }, [src, fallbackSrc]);
-
-  const handleError = useCallback(() => {
-    setImgSrc((prevState) => {
-      if (prevState === fallbackSrc) return prevState;
-
-      return fallbackSrc;
-    });
-  }, [fallbackSrc]);
+  // 2. We calculate if we should show the fallback during render
+  // If the current prop 'src' matches the 'failedUrl', show fallback.
+  // If 'src' changes, this automatically becomes false (resetting the error).
+  const isError = failedUrl === src;
+  const activeSrc = isError ? fallbackSrc : src;
 
   return (
     <Image
-      src={imgSrc}
+      src={activeSrc}
       className={className}
       alt={alt}
       width={width}
       height={height}
-      onError={handleError}
+      // 3. On error, we mark THIS specific src as failed
+      onError={() => setFailedUrl(src)}
     />
   );
 };
