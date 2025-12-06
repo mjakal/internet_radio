@@ -2,7 +2,13 @@ import { NextResponse } from 'next/server';
 import { RadioStation } from '@/app/types';
 import { getFavorites, addFavorite, deleteFavorite } from '@/lib/db';
 
+const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER;
+
 export function GET() {
+  if (PLAYER_TYPE === 'STANDALONE') {
+    return NextResponse.json({ data: [] }, { status: 500 });
+  }
+
   try {
     const favorites = getFavorites();
 
@@ -14,6 +20,10 @@ export function GET() {
 }
 
 export async function POST(request: Request) {
+  if (PLAYER_TYPE === 'STANDALONE') {
+    return NextResponse.json({ error: 'API request failed.' }, { status: 500 });
+  }
+
   try {
     const data: RadioStation = await request.json(); // Parse JSON body
     const result = addFavorite(data);
@@ -26,6 +36,10 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  if (PLAYER_TYPE === 'STANDALONE') {
+    return NextResponse.json({ data: [] }, { status: 500 });
+  }
+
   try {
     const data: RadioStation = await request.json();
 

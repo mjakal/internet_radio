@@ -1,6 +1,7 @@
 // /api/proxy/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import net from 'net';
+import { isValidPublicUrl } from '../../../lib/validate_url';
 import { URL } from 'url';
 
 export const runtime = 'nodejs';
@@ -133,10 +134,10 @@ async function runHttpsProxy(streamUrl: string): Promise<NextResponse> {
  */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const streamUrl = searchParams.get('url');
+  const streamUrl = searchParams.get('url') || '';
 
-  if (!streamUrl) {
-    return new NextResponse('URL parameter is required', { status: 400 });
+  if (!isValidPublicUrl(streamUrl)) {
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 
   try {

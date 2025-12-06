@@ -9,6 +9,7 @@ import { NextResponse } from 'next/server';
 import { parseStringPromise } from 'xml2js';
 import { RadioStation, StreamWatchdog } from '@/app/types';
 
+const PLAYER_TYPE = process.env.NEXT_PUBLIC_PLAYER;
 const JSON_OPTIONS = {
   explicitArray: false, // Always put child nodes in arrays
   explicitCharkey: true, // Use a custom key for text content
@@ -110,6 +111,10 @@ function stopWatchdog() {
 // API Handlers
 // --------------------------
 export async function GET(request: Request) {
+  if (PLAYER_TYPE !== 'SERVER') {
+    return NextResponse.json({ error: 'API request failed' }, { status: 500 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'status';
@@ -122,6 +127,10 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (PLAYER_TYPE !== 'SERVER') {
+    return NextResponse.json({ error: 'API request failed' }, { status: 500 });
+  }
+
   try {
     const data: RadioStation = await request.json();
     const encodedURL = encodeURIComponent(data.url);
@@ -145,6 +154,10 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE() {
+  if (PLAYER_TYPE !== 'SERVER') {
+    return NextResponse.json({ playback: false, data: {} }, { status: 500 });
+  }
+
   try {
     await vlcAPIHandler('status.xml?command=pl_stop');
     await vlcAPIHandler('status.xml?command=pl_empty');
