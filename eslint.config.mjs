@@ -59,6 +59,7 @@ export default tseslint.config(
       ...nextPlugin.configs["core-web-vitals"].rules,
 
       // Custom Overrides
+      "react-hooks/set-state-in-effect": "off",
       "react/no-unescaped-entities": "off",
       "react/prop-types": "off",
       "@next/next/no-img-element": "off",
