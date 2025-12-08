@@ -88,9 +88,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     // Early exit - station not defined
     if (!nextStation) return;
 
-    // Early exit - station already playing
-    // if (nextStation.station_id === station?.station_id) return;
-
     // Inform the backend to register this station click with the Radio Browser API
     // This helps track popular stations and keeps the public database up-to-date
     fetch('/api/stations', {
@@ -104,8 +101,10 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     if (playbackStatus === 'ERROR') return;
 
+    const replayKey = Date.now();
+
     // For the client side playback we just need to set nextStation to state
-    setStation({ ...nextStation });
+    setStation({ ...nextStation, replayKey });
   }, []);
 
   const stopPlayback = useCallback(() => {

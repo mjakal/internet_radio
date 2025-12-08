@@ -16,6 +16,7 @@ export interface RadioStation {
   favicon: string;
   tags?: string;
   codec?: string;
+  replayKey?: number;
   bitrate?: number;
 }
 

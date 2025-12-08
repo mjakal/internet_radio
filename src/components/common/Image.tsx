@@ -25,7 +25,7 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   // If the current prop 'src' matches the 'failedUrl', show fallback.
   // If 'src' changes, this automatically becomes false (resetting the error).
   const isError = failedUrl === src;
-  const activeSrc = isError ? fallbackSrc : src;
+  const activeSrc = src && !isError ? src : fallbackSrc;
 
   return (
     <Image
