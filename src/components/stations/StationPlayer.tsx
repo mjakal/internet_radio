@@ -25,49 +25,57 @@ const StationPlayer = () => {
   useEffect(() => {
     if (!station) return;
 
-    // 1. Setup an ignore flag to prevent race conditions (React Strict Mode compliant)
-    let ignore = false;
     const { url } = station;
+    const controller = new AbortController();
+    const signal = controller.signal;
 
-    const encodedUrl = encodeURIComponent(url);
+    // We use a specific ID to track the timeout so we can clear it
+    let timeoutId: NodeJS.Timeout;
+
     const endpointURL =
-      PLAYER_TYPE === 'SERVER' ? '/api/player?type=playlist' : `/api/info?stream=${encodedUrl}`;
+      PLAYER_TYPE === 'SERVER'
+        ? '/api/player?type=playlist'
+        : `/api/info?stream=${encodeURIComponent(url)}`;
 
     const getStreamInfo = async () => {
       try {
-        const response = await fetch(endpointURL);
+        const response = await fetch(endpointURL, { signal });
         const data = await response.json();
         const nowPlaying = data.nowPlaying;
 
-        // If the component unmounted or station changed, stop here
-        if (ignore) return;
-
         if (!nowPlaying || nowPlaying === 'undefined') {
-          // Update state linked to THIS station url
           setStreamData({ url, info: 'No info...' });
-        } else {
-          setStreamData((prev) => {
-            // Optimization: Only update if value actually changed
-            if (prev.url === url && prev.info === nowPlaying) return prev;
-            return { url, info: nowPlaying };
-          });
+          // We do NOT schedule the next timeout here, effectively stopping the loop
+          return;
         }
+
+        setStreamData((prev) => {
+          if (prev.url === url && prev.info === nowPlaying) return prev;
+          return { url, info: nowPlaying };
+        });
+
+        // RECURSIVE PATTERN:
+        // Only schedule the next fetch AFTER this one finishes.
+        // This acts as the interval, but safer.
+        timeoutId = setTimeout(getStreamInfo, 5000);
       } catch (error) {
-        if (!ignore) {
-          console.error('API request failed:', error);
-          setStreamData({ url, info: 'No info...' });
-        }
+        // Ignore if the request was cancelled
+        if (error instanceof Error && error.name === 'AbortError') return;
+
+        console.error('API request failed:', error);
+        setStreamData({ url, info: 'No info...' });
+
+        // Retry on error
+        timeoutId = setTimeout(getStreamInfo, 5000);
       }
     };
 
-    // 2. Call immediately, then set interval
+    // THE ONE-LINER YOU WANTED
     getStreamInfo();
-    const interval = setInterval(getStreamInfo, 5000);
 
-    // 3. Cleanup: Clear interval and mark this specific effect execution as ignored
     return () => {
-      ignore = true;
-      clearInterval(interval);
+      controller.abort();
+      clearTimeout(timeoutId); // Clear the timeout on unmount
     };
   }, [station]);
 
