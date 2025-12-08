@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -H 0.0.0.0",
     "lint": "eslint src",
-    "lint-fix": "eslint --fix ."
+    "lint-fix": "eslint --fix src"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
