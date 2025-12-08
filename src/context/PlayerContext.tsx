@@ -104,7 +104,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const replayKey = Date.now();
 
     // For the client side playback we just need to set nextStation to state
-    setStation({ ...nextStation, replayKey });
+    setStation({ ...nextStation });
   }, []);
 
   const stopPlayback = useCallback(() => {
