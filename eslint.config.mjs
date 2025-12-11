@@ -21,7 +21,7 @@ const compat = new FlatCompat({
 export default tseslint.config(
   // Global Ignores
   {
-    ignores: [".next/*", "node_modules/*"],
+    ignores: ["*.config.js", "*.d.ts", ".git", "*.mjs", ".next/*", "node_modules/*", "public", ".vscode"],
   },
 
   // Base JS & TypeScript Rules
