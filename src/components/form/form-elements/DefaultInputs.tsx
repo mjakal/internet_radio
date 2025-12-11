@@ -4,7 +4,7 @@ import ComponentCard from '../../common/ComponentCard';
 import Label from '../Label';
 import Input from '../input/InputField';
 import Select from '../Select';
-import { ChevronDownIcon, EyeCloseIcon, EyeIcon, TimeIcon } from '../../../icons';
+import { ChevronDownIcon, EyeIcon, EyeSlashIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 export default function DefaultInputs() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +16,7 @@ export default function DefaultInputs() {
   const handleSelectChange = (value: string) => {
     console.log('Selected value:', value);
   };
+
   return (
     <ComponentCard title="Default Inputs">
       <div className="space-y-6">
@@ -37,7 +38,7 @@ export default function DefaultInputs() {
               className="dark:bg-dark-900"
             />
             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 dark:text-gray-400">
-              <ChevronDownIcon />
+              <ChevronDownIcon className="h-5 w-5" />
             </span>
           </div>
         </div>
@@ -50,9 +51,9 @@ export default function DefaultInputs() {
               className="absolute top-1/2 right-4 z-30 -translate-y-1/2 cursor-pointer"
             >
               {showPassword ? (
-                <EyeIcon className="fill-gray-500 dark:fill-gray-400" />
+                <EyeIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               ) : (
-                <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400" />
+                <EyeSlashIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               )}
             </button>
           </div>
@@ -63,7 +64,7 @@ export default function DefaultInputs() {
           <div className="relative">
             <Input type="time" id="tm" name="tm" onChange={(e) => console.log(e.target.value)} />
             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 dark:text-gray-400">
-              <TimeIcon />
+              <ClockIcon className="h-5 w-5" />
             </span>
           </div>
         </div>
@@ -72,6 +73,7 @@ export default function DefaultInputs() {
           <div className="relative">
             <Input type="text" placeholder="Card number" className="pl-[62px]" />
             <span className="absolute top-1/2 left-0 flex h-11 w-[46px] -translate-y-1/2 items-center justify-center border-r border-gray-200 dark:border-gray-800">
+              {/* Payment Logo (kept as raw SVG since it's a specific brand logo) */}
               <svg
                 width="20"
                 height="20"

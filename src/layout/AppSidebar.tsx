@@ -4,8 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Orbitron } from 'next/font/google';
 import { useSidebar } from '../context/SidebarContext';
-import { ChevronDownIcon, HorizontaLDots } from '../icons/index';
-import { PlayIcon, StarIcon } from '@heroicons/react/24/solid';
+import {
+  PlayIcon,
+  StarIcon,
+  ChevronDownIcon,
+  EllipsisHorizontalIcon,
+} from '@heroicons/react/24/solid';
 import Image from 'next/image';
 
 const orbitron = Orbitron({
@@ -246,7 +250,11 @@ const AppSidebar: React.FC = () => {
                   !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start'
                 }`}
               >
-                {isExpanded || isHovered || isMobileOpen ? 'Menu' : <HorizontaLDots />}
+                {isExpanded || isHovered || isMobileOpen ? (
+                  'Menu'
+                ) : (
+                  <EllipsisHorizontalIcon className="h-6 w-6" />
+                )}
               </h2>
               {renderMenuItems(navItems, 'main')}
             </div>

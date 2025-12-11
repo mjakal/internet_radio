@@ -4,7 +4,7 @@ import ComponentCard from '../../common/ComponentCard';
 import Label from '../Label';
 import Select from '../Select';
 import MultiSelect from '../MultiSelect';
-import { ChevronDownIcon } from '@/icons';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 export default function SelectInputs() {
   const options = [
@@ -40,7 +40,8 @@ export default function SelectInputs() {
               className="dark:bg-dark-900"
             />
             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 dark:text-gray-400">
-              <ChevronDownIcon />
+              {/* 2. Updated Icon Usage */}
+              <ChevronDownIcon className="h-5 w-5" />
             </span>
           </div>
         </div>
