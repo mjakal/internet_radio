@@ -81,12 +81,16 @@ function startWatchdog() {
 
   const checkPlayback = async () => {
     try {
-      const { playback, data } = await getStatus();
-      if (playback) return; // already playing
-      if (!data?.url) return; // no station
+      const { playback } = await getStatus();
+      const { station } = CACHED_STATION;
 
-      console.log(`[Watchdog] Playback stopped, retrying ${data.url}…`);
-      const encodedURL = encodeURIComponent(data.url);
+      if (playback) return; // already playing
+      if (!station) return; // no station
+
+      const stationUrl = station.url;
+      const encodedURL = encodeURIComponent(stationUrl);
+
+      console.log(`[Watchdog] Playback stopped, retrying ${stationUrl}…`);
 
       await vlcAPIHandler('status.xml?command=pl_stop');
       await vlcAPIHandler('status.xml?command=pl_empty');
