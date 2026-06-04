@@ -21,6 +21,9 @@ const JSON_OPTIONS = {
 const VLC_BASE_URL = process.env.NEXT_VLC_BASE_URL || '';
 const VLC_USERNAME = process.env.NEXT_VLC_USERNAME || '';
 const VLC_PASSWORD = process.env.NEXT_VLC_PASSWORD || '';
+const VLC_REQUEST_TIMEOUT_MS = 8000;
+const WATCHDOG_INTERVAL_MS = 5000;
+const WATCHDOG_STALL_THRESHOLD = 3;
 
 // Encode credentials to Base64
 const VLC_AUTH = Buffer.from(`${VLC_USERNAME}:${VLC_PASSWORD}`).toString('base64');
@@ -33,18 +36,36 @@ const STREAM_WATCHDOG: StreamWatchdog = {
   interval: null,
   running: false,
 };
+const WATCHDOG_STATE = {
+  checking: false,
+  stalledChecks: 0,
+  lastReadBytes: null as number | null,
+};
 
 // --------------------------
 // VLC HTTP API helper
 // --------------------------
 async function vlcAPIHandler(urlSuffix: string) {
-  const response = await fetch(`${VLC_BASE_URL}${urlSuffix}`, {
-    method: 'GET',
-    headers: { Authorization: `Basic ${VLC_AUTH}` },
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), VLC_REQUEST_TIMEOUT_MS);
 
-  const xml = await response.text();
-  return parseStringPromise(xml, JSON_OPTIONS);
+  try {
+    const response = await fetch(`${VLC_BASE_URL}${urlSuffix}`, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: { Authorization: `Basic ${VLC_AUTH}` },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`VLC API request failed with HTTP ${response.status}: ${urlSuffix}`);
+    }
+
+    const xml = await response.text();
+    return parseStringPromise(xml, JSON_OPTIONS);
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 // --------------------------
@@ -53,11 +74,21 @@ async function vlcAPIHandler(urlSuffix: string) {
 async function getStatus() {
   const response = await vlcAPIHandler('status.xml');
   const playbackStatus = response?.root?.state?.value;
+  const readBytesRaw = response?.root?.stats?.readbytes?.value;
+  const readBytes =
+    typeof readBytesRaw === 'string' || typeof readBytesRaw === 'number'
+      ? Number(readBytesRaw)
+      : null;
   const isPlaying = playbackStatus === 'playing';
 
-  if (!isPlaying) return { playback: false, data: null };
+  if (!isPlaying) return { playback: false, data: null, state: playbackStatus, readBytes: null };
 
-  return { playback: true, data: CACHED_STATION.station };
+  return {
+    playback: true,
+    data: CACHED_STATION.station,
+    state: playbackStatus,
+    readBytes: Number.isFinite(readBytes) ? readBytes : null,
+  };
 }
 
 // --------------------------
@@ -78,35 +109,72 @@ function startWatchdog() {
   if (STREAM_WATCHDOG.running) return;
 
   STREAM_WATCHDOG.running = true;
+  WATCHDOG_STATE.checking = false;
+  WATCHDOG_STATE.stalledChecks = 0;
+  WATCHDOG_STATE.lastReadBytes = null;
 
   const checkPlayback = async () => {
+    if (WATCHDOG_STATE.checking) return;
+
+    WATCHDOG_STATE.checking = true;
+
     try {
-      const { playback } = await getStatus();
       const { station } = CACHED_STATION;
 
-      if (playback) return; // already playing
       if (!station) return; // no station
+
+      const { playback, state, readBytes } = await getStatus();
+      const previousReadBytes = WATCHDOG_STATE.lastReadBytes;
+
+      if (readBytes !== null) {
+        if (previousReadBytes !== null && readBytes <= previousReadBytes) {
+          WATCHDOG_STATE.stalledChecks += 1;
+        } else {
+          WATCHDOG_STATE.stalledChecks = 0;
+        }
+        WATCHDOG_STATE.lastReadBytes = readBytes;
+      } else {
+        WATCHDOG_STATE.stalledChecks = 0;
+        WATCHDOG_STATE.lastReadBytes = null;
+      }
+
+      const isStalled =
+        playback &&
+        WATCHDOG_STATE.stalledChecks >= WATCHDOG_STALL_THRESHOLD &&
+        WATCHDOG_STATE.lastReadBytes !== null;
+
+      if (playback && !isStalled) return; // still active
 
       const stationUrl = station.url;
       const encodedURL = encodeURIComponent(stationUrl);
+      const reason = playback
+        ? `stalled stream (readbytes unchanged for ${WATCHDOG_STATE.stalledChecks} checks)`
+        : `state=${state || 'unknown'}`;
 
-      console.log(`[Watchdog] Playback stopped, retrying ${stationUrl}…`);
+      console.log(`[Watchdog] Restarting stream due to ${reason}, station=${stationUrl}`);
 
       await vlcAPIHandler('status.xml?command=pl_stop');
       await vlcAPIHandler('status.xml?command=pl_empty');
       await vlcAPIHandler(`status.xml?command=in_play&input=${encodedURL}`);
+      WATCHDOG_STATE.stalledChecks = 0;
+      WATCHDOG_STATE.lastReadBytes = null;
     } catch (err) {
       console.error('[Watchdog] Error:', err);
+    } finally {
+      WATCHDOG_STATE.checking = false;
     }
   };
 
-  STREAM_WATCHDOG.interval = setInterval(checkPlayback, 5000);
+  STREAM_WATCHDOG.interval = setInterval(checkPlayback, WATCHDOG_INTERVAL_MS);
 }
 
 function stopWatchdog() {
   if (!STREAM_WATCHDOG.running) return;
 
   STREAM_WATCHDOG.running = false;
+  WATCHDOG_STATE.checking = false;
+  WATCHDOG_STATE.stalledChecks = 0;
+  WATCHDOG_STATE.lastReadBytes = null;
   if (STREAM_WATCHDOG.interval) clearInterval(STREAM_WATCHDOG.interval);
   STREAM_WATCHDOG.interval = null;
 }
